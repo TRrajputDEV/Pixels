@@ -19,7 +19,7 @@ app.use(express.static("public"))
 
 // we are using here app.use as this is an configration of this app - aka CORs, 
 
-app.use (express.cookieParser())
+app.use(cookieParser())
 
 
 export {app} 
