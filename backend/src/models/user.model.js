@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { JsonWebToken } from "jsonwebtoken";
+import { jwt } from "jsonwebtoken";
 import bcrypt from 'bcrypt'
 
 const userSchema = new mongoose.Schema(
@@ -45,18 +45,20 @@ const userSchema = new mongoose.Schema(
 }
 ,{timestamps: true});
 
-userSchema.pre("Save", async function (next) {
+// this bro here is use to do pre mtlb ye krne se phle ek br 
+userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return next();
 
     this.password = bcrypt.hash(this.password, 10)
     next()
 })
 
-userSchema.method.isPasswordCorrect = async function(password) {
+userSchema.methods.isPasswordCorrect = async function(password) {
     await bcrypt.compare(password, this.password)
 }
+
 userSchema.methods.generateAccessToken = function(){
-    return JsonWebToken.sign(
+    return jwt.sign(
         {
             _id: this._id,
             email: this.email,
@@ -70,7 +72,7 @@ userSchema.methods.generateAccessToken = function(){
     )
 }
 userSchema.methods.generateRefreshToken = function(){
-        return JsonWebToken.sign(
+        return jwt.sign(
         {
             _id: this._id,
         },

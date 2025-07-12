@@ -3,7 +3,7 @@ import connectDB from "./db/index.js";
 import { app } from "./app.js";
 
 dotenv.config({
-    path: './env'
+    path: './env' // dotenv config setup bro there is this as it will fetch this env and all...
 })
 
 connectDB()

@@ -7,7 +7,7 @@ const connectDB = async () => {
         console.log(`\n MongoDB connected !! DB Host: ${connectionInstance.connection.host}`)
     } catch (error) {
         console.log("MONGODB connection error ", error);
-        process.exit(1);
+        process.exit(1); // this is used to indicate nodejs to exit the Process synchronously with exit status (1).
     }
 }
 
