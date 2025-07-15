@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import pkg from "jsonwebtoken";
-const { sign, verify, JsonWebTokenError } = pkg;
+import jwt from "jsonwebtoken"; // Fixed import
 import bcrypt from 'bcrypt'
 
 const userSchema = new mongoose.Schema(
@@ -31,7 +30,7 @@ const userSchema = new mongoose.Schema(
             index: true
         },
         avatar: {
-            type: String, // cloudnary
+            type: String, // cloudinary
             required: true,
         },
         watchHistory: [
@@ -47,10 +46,11 @@ const userSchema = new mongoose.Schema(
         refreshToken: {
             type: String
         }
-}
-,{timestamps: true});
+    },
+    { timestamps: true }
+);
 
-// this bro here is use to do pre mtlb ye krne se phle ek br 
+// Hash password before saving
 userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return next();
 
@@ -58,8 +58,9 @@ userSchema.pre("save", async function (next) {
     next()
 })
 
+// FIXED: Added return statement
 userSchema.methods.isPasswordCorrect = async function(password) {
-    await bcrypt.compare(password, this.password)
+    return await bcrypt.compare(password, this.password)
 }
 
 userSchema.methods.generateAccessToken = function () {
@@ -89,5 +90,4 @@ userSchema.methods.generateRefreshToken = function () {
     );
 };
 
-
-export const User = mongoose.model("User", userSchema); 
+export const User = mongoose.model("User", userSchema);
