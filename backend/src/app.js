@@ -25,12 +25,3 @@ import userRouter from './routes/user.routes.js'
 app.use("/api/v1/users", userRouter)
 
 export {app} 
-
-/* Why me ? This feeling always haunts me.
-    Am I Enough , can I do this , why I am not an achiever ???? not even a single Win ....
-    whyy there is always someone better than me....
-    will I get a chance to be happy... .why I am surrounded by OverAchivers ??? WHyyyy I can't be At top. I did the same
-    I studied , Did everything , will it again end the same way......
-    Do I have any chance or I am just here to fill the crowd... WHYYYYY why it has to be like this
-    
-*/
