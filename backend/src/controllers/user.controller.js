@@ -111,9 +111,10 @@ const loginUser = asyncHandler(async (req, res) => {
     */
 
     const { email, username, password } = req.body;
+    console.log(req.body)
 
     // Check if username or email is provided
-    if (!username && !email) {
+    if (!(username && email)) {
         throw new ApiError(400, "Username or email is required")
     }
 
@@ -240,9 +241,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
+    const {oldPassword, newPassword} = req.body;
     const user = await User.findById(req.user?._id);
-
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
     if (!isPasswordCorrect) {
@@ -273,7 +273,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All field are required")
     }
 
-    const user = User.findByIdAndUpdate(req.user?._id,
+    const user = await  User.findByIdAndUpdate(req.user?._id,
         {
             $set: {
                 fullname,

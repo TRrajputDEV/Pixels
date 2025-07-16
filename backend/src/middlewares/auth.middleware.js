@@ -8,7 +8,7 @@ export const VerifyJWT = asyncHandler(async (req, res, next) => {
         // Get token from cookies or Authorization header
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
         
-        console.log("Token received:", token ? "Token exists" : "No token");
+        // console.log("Token received:", token ? "Token exists" : "No token");
         
         if (!token) {
             throw new ApiError(401, "Unauthorized request - No token provided")
@@ -18,7 +18,7 @@ export const VerifyJWT = asyncHandler(async (req, res, next) => {
         let decodedToken;
         try {
             decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-            console.log("Token decoded successfully:", decodedToken._id);
+            // console.log("Token decoded successfully:", decodedToken._id);
         } catch (jwtError) {
             console.log("JWT verification error:", jwtError.message);
             throw new ApiError(401, "Invalid access token - Token verification failed")
