@@ -359,7 +359,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             $lookup: {
                 from: "subscriptions",
                 localField: "_id",
-                foreignField: "channel",
+                foreignField: "channel", // this get us the all about kon kon iss channel ko subscribe krke rakha hai Means 1 M subscriber
                 as: "subscribers"
             }
         },
@@ -368,7 +368,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             $lookup: {
                 from: "subscriptions",
                 localField: "_id",
-                foreignField: "subscriber",
+                foreignField: "subscriber", // this gives us the ki iss user ne kis _id ko follow krta h hitesh -> kis kis ko follow // 200 ko follow krta h
                 as: "subscribedTo"
             }
         },
@@ -383,7 +383,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 },
                 isSubscribed: {
                     $cond: {
-                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                        if: {$in: [req.user?._id, "$subscribers.subscriber"] },
                         then: true,
                         else: false
                     }
@@ -405,7 +405,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         }
     ])
 
-    if (!channel?.lengh) {
+    if (!channel?.length){
         throw new ApiError(404, "channel does not exists")
     }
     return res

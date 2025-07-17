@@ -1,5 +1,5 @@
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
-import mongoose, { Schema, SchemaTypes } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 
 const VideoSchema = new mongoose.Schema(
