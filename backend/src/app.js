@@ -1,9 +1,11 @@
 import express from 'express'
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
+import morgan from 'morgan';
 // making the server here from express
 
 const app = express();
+app.use(morgan('combined'));
 
 // setting up the CORS configration so we can have the URI setup for API request Acceptance.
 app.use(cors({
