@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
 import RegisterModal from '../auth/RegisterModal';
+import Logo from '../ui/Logo';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
@@ -47,18 +48,12 @@ const Navbar = () => {
                     <div className="flex justify-between items-center h-16">
                         {/* Logo Section */}
                         <div className="flex items-center space-x-8">
-                            <button
+                            <Logo 
                                 onClick={() => navigate('/')}
-                                className="flex items-center space-x-3 group"
-                            >
-                                {/* Premium Loop Logo */}
-                                <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center shadow">
-                                    <div className="w-4 h-4 border-2 border-amber-300 rounded-full border-dashed animate-spin-slow"></div>
-                                </div>
-                                <span className="text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">
-                                    Loop
-                                </span>
-                            </button>
+                                size="default"
+                                showText={true}
+                                className="transition-transform hover:scale-105"
+                            />
 
                             {/* Navigation Links */}
                             <div className="hidden md:flex items-center space-x-1">
@@ -69,15 +64,15 @@ const Navbar = () => {
                             </div>
                         </div>
 
-                        {/* Search Bar */}
+                        {/* Enhanced Search Bar */}
                         <div className="flex-1 max-w-2xl mx-8">
-                            <div className="relative">
+                            <div className="relative group">
                                 <input
                                     type="text"
                                     placeholder="Search videos, creators, or topics..."
-                                    className="w-full px-4 py-2.5 bg-gray-800 border border-emerald-900/50 text-white rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="w-full px-4 py-2.5 bg-gray-800/80 backdrop-blur-sm border border-emerald-900/50 text-white rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-gray-800 transition-all duration-300 shadow-inner-light"
                                 />
-                                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-emerald-500">
+                                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-emerald-500 hover:text-amber-300 transition-colors p-1 rounded-lg hover:bg-emerald-900/20">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
@@ -91,15 +86,15 @@ const Navbar = () => {
                                 <div className="flex items-center space-x-3">
                                     <button
                                         onClick={() => handleAuthAction('login')}
-                                        className="px-5 py-2 text-emerald-300 border border-emerald-700 rounded-lg hover:bg-emerald-900/30 transition-colors font-medium"
+                                        className="px-5 py-2.5 text-emerald-300 border border-emerald-700/50 rounded-xl hover:bg-emerald-900/30 hover:border-emerald-500 transition-all duration-300 font-medium shadow-inner-light backdrop-blur-sm"
                                     >
                                         Sign In
                                     </button>
                                     <button
                                         onClick={() => handleAuthAction('register')}
-                                        className="px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                                        className="btn-primary"
                                     >
-                                        Get Started
+                                        ✨ Get Started
                                     </button>
                                 </div>
                             ) : (

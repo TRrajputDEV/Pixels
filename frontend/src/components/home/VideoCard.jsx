@@ -27,15 +27,15 @@ const VideoCard = ({ video }) => {
 
     return (
         <div 
-            className="group cursor-pointer"
+            className="group cursor-pointer card-hover animate-fade-in"
             onClick={() => navigate(`/watch/${video._id}`)}
         >
             {/* Thumbnail */}
-            <div className="relative aspect-video rounded-xl overflow-hidden mb-3 border border-emerald-900/30 shadow-lg">
+            <div className="relative aspect-video rounded-xl overflow-hidden mb-3 border border-emerald-900/30 shadow-lg group-hover:shadow-glow-emerald transition-all duration-500">
                 <img
                     src={video.thumbnail}
                     alt={video.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                 />
                 
                 {/* Live indicator */}

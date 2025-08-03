@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import VideoGrid from './VideoGrid';
 import Hero from './Hero';
+import Logo from '../ui/Logo';
 
 const HomePage = () => {
     const [videos, setVideos] = useState([]);
