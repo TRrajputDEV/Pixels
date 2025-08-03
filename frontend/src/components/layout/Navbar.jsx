@@ -1,5 +1,5 @@
 // src/components/layout/Navbar.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
 import RegisterModal from '../auth/RegisterModal';
@@ -10,7 +10,17 @@ const Navbar = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
     const navigate = useNavigate();
+
+    // Add shadow on scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleAuthAction = (action) => {
         if (action === 'login') {
@@ -28,20 +38,35 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="bg-white border-b border-gray-200 fixed w-full top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+                isScrolled 
+                    ? 'bg-gray-900 shadow-lg border-b border-emerald-900/30' 
+                    : 'bg-gray-900'
+            }`}>
+                <div className="max-w-7xl mx-auto px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        {/* Logo */}
-                        <div className="flex items-center">
+                        {/* Logo Section */}
+                        <div className="flex items-center space-x-8">
                             <button
                                 onClick={() => navigate('/')}
-                                className="flex items-center space-x-2"
+                                className="flex items-center space-x-3 group"
                             >
-                                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold text-lg">▶</span>
+                                {/* Premium Loop Logo */}
+                                <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center shadow">
+                                    <div className="w-4 h-4 border-2 border-amber-300 rounded-full border-dashed animate-spin-slow"></div>
                                 </div>
-                                <span className="text-xl font-bold text-gray-900">StreamTube</span>
+                                <span className="text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">
+                                    Loop
+                                </span>
                             </button>
+
+                            {/* Navigation Links */}
+                            <div className="hidden md:flex items-center space-x-1">
+                                <NavLink to="/" label="Home" />
+                                <NavLink to="/trending" label="Trending" />
+                                <NavLink to="/subscriptions" label="Subscriptions" />
+                                <NavLink to="/library" label="Library" />
+                            </div>
                         </div>
 
                         {/* Search Bar */}
@@ -49,91 +74,106 @@ const Navbar = () => {
                             <div className="relative">
                                 <input
                                     type="text"
-                                    placeholder="Search videos..."
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    placeholder="Search videos, creators, or topics..."
+                                    className="w-full px-4 py-2.5 bg-gray-800 border border-emerald-900/50 text-white rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                                 />
-                                <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-emerald-500">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </button>
                             </div>
                         </div>
 
-                        {/* Right side - Auth or User Menu */}
+                        {/* Right Side Actions */}
                         <div className="flex items-center space-x-4">
                             {!isAuthenticated ? (
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-3">
                                     <button
                                         onClick={() => handleAuthAction('login')}
-                                        className="px-4 py-2 text-red-600 border border-red-600 rounded-full hover:bg-red-50 transition-colors"
+                                        className="px-5 py-2 text-emerald-300 border border-emerald-700 rounded-lg hover:bg-emerald-900/30 transition-colors font-medium"
                                     >
                                         Sign In
                                     </button>
                                     <button
                                         onClick={() => handleAuthAction('register')}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                                        className="px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
                                     >
-                                        Sign Up
+                                        Get Started
                                     </button>
                                 </div>
                             ) : (
-                                <div className="relative">
+                                <div className="flex items-center space-x-4">
                                     {/* Upload Button */}
                                     <button
                                         onClick={() => navigate('/upload')}
-                                        className="mr-4 p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+                                        className="p-2.5 bg-gray-800 border border-emerald-900/50 rounded-lg hover:bg-emerald-900/30 transition-colors group"
                                         title="Upload Video"
                                     >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-emerald-400 group-hover:text-amber-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                         </svg>
                                     </button>
 
-                                    {/* User Avatar */}
-                                    <button
-                                        onClick={() => setShowUserMenu(!showUserMenu)}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        {user?.avatar ? (
-                                            <img
-                                                src={user.avatar}
-                                                alt={user.fullname}
-                                                className="w-8 h-8 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                                <span className="text-gray-600 text-sm font-medium">
-                                                    {user?.fullname?.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                        )}
+                                    {/* Notifications */}
+                                    <button className="relative p-2.5 bg-gray-800 border border-emerald-900/50 rounded-lg hover:bg-emerald-900/30 transition-colors group">
+                                        <svg className="w-5 h-5 text-emerald-400 group-hover:text-amber-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                        <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full"></div>
                                     </button>
 
-                                    {/* Dropdown Menu */}
-                                    {showUserMenu && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                            <button
-                                                onClick={() => navigate('/dashboard')}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                            >
-                                                Dashboard
-                                            </button>
-                                            <button
-                                                onClick={() => navigate('/profile')}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                            >
-                                                Your Channel
-                                            </button>
-                                            <hr className="my-1" />
-                                            <button
-                                                onClick={handleLogout}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                            >
-                                                Sign Out
-                                            </button>
-                                        </div>
-                                    )}
+                                    {/* User Menu */}
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setShowUserMenu(!showUserMenu)}
+                                            className="flex items-center p-1.5 bg-gray-800 border border-emerald-900/50 rounded-lg hover:bg-emerald-900/30 transition-colors"
+                                        >
+                                            {user?.avatar ? (
+                                                <img
+                                                    src={user.avatar}
+                                                    alt={user.fullname}
+                                                    className="w-8 h-8 rounded-lg object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center">
+                                                    <span className="text-white text-sm font-semibold">
+                                                        {user?.fullname?.charAt(0).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </button>
+
+                                        {/* Dropdown Menu */}
+                                        {showUserMenu && (
+                                            <div className="absolute right-0 mt-2 w-56 bg-gray-900 border border-emerald-900/30 rounded-lg shadow-lg py-2 z-50">
+                                                <div className="px-4 py-3 border-b border-emerald-900/30">
+                                                    <div className="flex items-center space-x-3">
+                                                        {user?.avatar ? (
+                                                            <img src={user.avatar} alt={user.fullname} className="w-9 h-9 rounded-lg object-cover" />
+                                                        ) : (
+                                                            <div className="w-9 h-9 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center">
+                                                                <span className="text-white font-semibold">{user?.fullname?.charAt(0).toUpperCase()}</span>
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <p className="text-white font-medium">{user?.fullname}</p>
+                                                            <p className="text-emerald-400 text-sm">@{user?.username}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <DropdownItem onClick={() => navigate('/dashboard')} icon="📊" label="Dashboard" />
+                                                <DropdownItem onClick={() => navigate('/profile')} icon="👤" label="Your Channel" />
+                                                <DropdownItem onClick={() => navigate('/analytics')} icon="📈" label="Analytics" />
+                                                <DropdownItem onClick={() => navigate('/settings')} icon="⚙️" label="Settings" />
+                                                
+                                                <div className="border-t border-emerald-900/30 mt-2 pt-2">
+                                                    <DropdownItem onClick={handleLogout} icon="🚪" label="Sign Out" danger />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -161,5 +201,33 @@ const Navbar = () => {
         </>
     );
 };
+
+// Navigation Link Component
+const NavLink = ({ to, label }) => {
+    const navigate = useNavigate();
+    return (
+        <button
+            onClick={() => navigate(to)}
+            className="px-4 py-2 text-emerald-300 hover:text-white hover:bg-emerald-900/30 rounded-lg transition-colors font-medium"
+        >
+            {label}
+        </button>
+    );
+};
+
+// Dropdown Item Component
+const DropdownItem = ({ onClick, icon, label, danger = false }) => (
+    <button
+        onClick={onClick}
+        className={`w-full flex items-center space-x-3 px-4 py-2.5 text-left transition-colors ${
+            danger 
+                ? 'text-amber-400 hover:bg-amber-900/10' 
+                : 'text-emerald-300 hover:bg-emerald-900/20'
+        }`}
+    >
+        <span>{icon}</span>
+        <span>{label}</span>
+    </button>
+);
 
 export default Navbar;

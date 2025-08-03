@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Add to src/index.css */
+/* src/index.css */
+@layer utilities {
+  .shadow-inset-gray {
+    box-shadow: inset 0 2px 4px 0 rgba(17, 24, 39, 0.25);
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}

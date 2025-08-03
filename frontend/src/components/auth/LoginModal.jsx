@@ -6,7 +6,6 @@ import Modal from '../ui/Modal';
 const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     const [formData, setFormData] = useState({
         email: '',
-        username: '',
         password: ''
     });
     const [errors, setErrors] = useState({});
@@ -15,115 +14,111 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
     const validateForm = () => {
         const newErrors = {};
-        
-        if (!formData.email && !formData.username) {
-            newErrors.login = 'Email or username is required';
-        }
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        }
-
+        if (!formData.email.trim()) newErrors.email = 'Email is required';
+        if (!formData.password.trim()) newErrors.password = 'Password is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         if (!validateForm()) return;
 
         setIsLoading(true);
-        
-        const loginData = {
-            password: formData.password,
-            ...(formData.email ? { email: formData.email } : { username: formData.username })
-        };
-
-        const result = await login(loginData);
+        const result = await login({
+            email: formData.email,
+            password: formData.password
+        });
         
         if (result.success) {
             onClose();
-            setFormData({ email: '', username: '', password: '' });
+            setFormData({ email: '', password: '' });
         } else {
             setErrors({ submit: result.error });
         }
-        
         setIsLoading(false);
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Sign in to StreamTube">
+        <Modal isOpen={isOpen} onClose={onClose} title="Sign in to Loop">
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Email/Username */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email or Username
+                    <label className="block text-sm font-medium text-emerald-300 mb-2">
+                        Email
                     </label>
-                    <input
-                        type="text"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="Enter your email or username"
-                    />
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="w-full pl-10 pr-3 py-2.5 bg-gray-800/50 border border-emerald-900/30 rounded-xl text-white placeholder-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 backdrop-blur-sm"
+                            placeholder="Enter your email"
+                        />
+                    </div>
+                    {errors.email && (
+                        <p className="text-amber-400 text-xs mt-1">{errors.email}</p>
+                    )}
                 </div>
 
-                {/* Password */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-emerald-300 mb-2">
                         Password
                     </label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="Enter your password"
-                    />
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className="w-full pl-10 pr-3 py-2.5 bg-gray-800/50 border border-emerald-900/30 rounded-xl text-white placeholder-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 backdrop-blur-sm"
+                            placeholder="Enter your password"
+                        />
+                    </div>
+                    {errors.password && (
+                        <p className="text-amber-400 text-xs mt-1">{errors.password}</p>
+                    )}
                 </div>
 
-                {/* Error Display */}
-                {(errors.login || errors.password || errors.submit) && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <div className="text-sm text-red-600">
-                            {errors.login || errors.password || errors.submit}
+                {errors.submit && (
+                    <div className="bg-gradient-to-r from-amber-900/30 to-amber-900/10 border border-amber-700/30 rounded-xl p-3">
+                        <div className="text-sm text-amber-300">
+                            {errors.submit}
                         </div>
                     </div>
                 )}
 
-                {/* Submit Button */}
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white rounded-xl hover:from-emerald-500 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-emerald-700/30"
                 >
                     {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
 
-                {/* Switch to Register */}
                 <div className="text-center">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-emerald-400/80">
                         Don't have an account?{' '}
                         <button
                             type="button"
                             onClick={onSwitchToRegister}
-                            className="text-red-600 hover:text-red-700 font-medium"
+                            className="text-amber-300 hover:text-amber-200 font-medium"
                         >
                             Sign up
                         </button>

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
-        loginField: '', // Single field for email or username
+        loginField: '',
         password: ''
     });
     const [errors, setErrors] = useState({});
@@ -15,131 +15,128 @@ const LoginForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
     const validateForm = () => {
         const newErrors = {};
-        
-        if (!formData.loginField.trim()) {
-            newErrors.loginField = 'Email or username is required';
-        }
-        if (!formData.password.trim()) {
-            newErrors.password = 'Password is required';
-        }
-
+        if (!formData.loginField.trim()) newErrors.loginField = 'Email or username is required';
+        if (!formData.password.trim()) newErrors.password = 'Password is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         if (!validateForm()) return;
 
         setIsLoading(true);
-        
-        // Determine if it's an email or username based on presence of @
         const isEmail = formData.loginField.includes('@');
         const loginData = {
             password: formData.password,
-            ...(isEmail 
-                ? { email: formData.loginField, username: formData.loginField } 
-                : { username: formData.loginField, email: formData.loginField }
-            )
+            ...(isEmail ? { email: formData.loginField } : { username: formData.loginField })
         };
 
         const result = await login(loginData);
-        
         if (result.success) {
             navigate('/dashboard');
         } else {
             setErrors({ submit: result.error });
         }
-        
         setIsLoading(false);
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-950 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                {/* Logo and Title */}
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
-                        <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-2xl">▶</span>
+                        <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center shadow-lg">
+                            <div className="w-6 h-6 border-2 border-amber-300 rounded-full border-dashed animate-spin-slow"></div>
                         </div>
                     </div>
-                    <h2 className="text-3xl font-extrabold text-gray-900">
-                        Sign in to StreamTube
+                    <h2 className="text-3xl font-bold text-emerald-300">
+                        Sign in to Loop
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
-                        Continue to your account
+                    <p className="mt-2 text-sm text-emerald-400/80">
+                        Continue to your premium account
                     </p>
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
-                        {/* Email or Username */}
                         <div>
-                            <label htmlFor="loginField" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="loginField" className="block text-sm font-medium text-emerald-300 mb-2">
                                 Email or Username
                             </label>
-                            <input
-                                id="loginField"
-                                name="loginField"
-                                type="text"
-                                value={formData.loginField}
-                                onChange={handleChange}
-                                className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
-                                placeholder="Enter your email or username"
-                            />
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    id="loginField"
+                                    name="loginField"
+                                    type="text"
+                                    value={formData.loginField}
+                                    onChange={handleChange}
+                                    className="w-full pl-10 pr-3 py-3 bg-gray-800/50 border border-emerald-900/30 rounded-xl text-white placeholder-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 backdrop-blur-sm"
+                                    placeholder="Enter your email or username"
+                                />
+                            </div>
                             {errors.loginField && (
-                                <p className="text-red-500 text-xs mt-1">{errors.loginField}</p>
+                                <p className="text-amber-400 text-xs mt-2 flex items-center">
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {errors.loginField}
+                                </p>
                             )}
                         </div>
 
-                        {/* Password */}
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label htmlFor="password" className="block text-sm font-medium text-emerald-300 mb-2">
                                 Password
                             </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
-                                placeholder="Enter your password"
-                            />
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    className="w-full pl-10 pr-3 py-3 bg-gray-800/50 border border-emerald-900/30 rounded-xl text-white placeholder-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 backdrop-blur-sm"
+                                    placeholder="Enter your password"
+                                />
+                            </div>
                             {errors.password && (
-                                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                                <p className="text-amber-400 text-xs mt-2 flex items-center">
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {errors.password}
+                                </p>
                             )}
                         </div>
                     </div>
 
-                    {/* Global Error Display */}
                     {errors.submit && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div className="bg-gradient-to-r from-amber-900/30 to-amber-900/10 border border-amber-700/30 rounded-xl p-4">
                             <div className="flex">
                                 <div className="flex-shrink-0">
-                                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                    <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                     </svg>
                                 </div>
                                 <div className="ml-3">
-                                    <div className="text-sm text-red-800">
+                                    <div className="text-sm text-amber-300">
                                         {errors.submit}
                                     </div>
                                 </div>
@@ -147,12 +144,11 @@ const LoginForm = () => {
                         </div>
                     )}
 
-                    {/* Submit Button */}
                     <div>
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                            className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-lg font-medium rounded-xl text-white bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-emerald-700/30"
                         >
                             {isLoading ? (
                                 <div className="flex items-center">
@@ -168,52 +164,47 @@ const LoginForm = () => {
                         </button>
                     </div>
 
-                    {/* Forgot Password */}
                     <div className="text-center">
                         <button
                             type="button"
-                            className="text-sm text-red-600 hover:text-red-700 font-medium"
-                            onClick={() => {
-                                // TODO: Implement forgot password functionality
-                                alert('Forgot password feature coming soon!');
-                            }}
+                            className="text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
                         >
                             Forgot your password?
                         </button>
                     </div>
 
-                    {/* Divider */}
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300" />
+                            <div className="w-full border-t border-emerald-900/30" />
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-gray-50 text-gray-500">Or</span>
+                            <span className="px-2 bg-gradient-to-b from-gray-900 to-gray-950 text-emerald-400/70">Or</span>
                         </div>
                     </div>
 
-                    {/* Register Link */}
                     <div className="text-center">
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-emerald-400/80">
                             Don't have an account?{' '}
                             <button
                                 type="button"
                                 onClick={() => navigate('/register')}
-                                className="font-medium text-red-600 hover:text-red-700 transition-colors"
+                                className="font-medium text-amber-300 hover:text-amber-200 transition-colors"
                             >
                                 Create account
                             </button>
                         </span>
                     </div>
 
-                    {/* Back to Home */}
                     <div className="text-center">
                         <button
                             type="button"
                             onClick={() => navigate('/')}
-                            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                            className="text-sm text-emerald-400/80 hover:text-emerald-300 transition-colors flex items-center justify-center"
                         >
-                            ← Back to Home
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Home
                         </button>
                     </div>
                 </form>
