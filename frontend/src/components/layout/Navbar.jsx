@@ -1,165 +1,166 @@
 // src/components/layout/Navbar.jsx
-import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import LoginModal from '../auth/LoginModal';
-import RegisterModal from '../auth/RegisterModal';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/context/AuthContext"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+import LoginModal from "@/components/auth/LoginModal"
+import RegisterModal from "@/components/auth/RegisterModal"
 
 const Navbar = () => {
-    const { user, isAuthenticated, logout } = useAuth();
-    const [showLoginModal, setShowLoginModal] = useState(false);
-    const [showRegisterModal, setShowRegisterModal] = useState(false);
-    const [showUserMenu, setShowUserMenu] = useState(false);
-    const navigate = useNavigate();
+    const { user, isAuthenticated, logout } = useAuth()
 
-    const handleAuthAction = (action) => {
-        if (action === 'login') {
-            setShowLoginModal(true);
-        } else if (action === 'register') {
-            setShowRegisterModal(true);
-        }
-    };
+    const [showLoginModal, setShowLoginModal] = useState(false)
+    const [showRegisterModal, setShowRegisterModal] = useState(false)
+    const navigate = useNavigate()
 
     const handleLogout = async () => {
-        await logout();
-        setShowUserMenu(false);
-        navigate('/');
-    };
+        await logout()
+        navigate("/")
+    }
 
     return (
         <>
-            <nav className="bg-white border-b border-gray-200 fixed w-full top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        {/* Logo */}
-                        <div className="flex items-center">
-                            <button
-                                onClick={() => navigate('/')}
-                                className="flex items-center space-x-2"
-                            >
-                                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold text-lg">▶</span>
-                                </div>
-                                <span className="text-xl font-bold text-gray-900">StreamTube</span>
-                            </button>
-                        </div>
+            {/* ───────────────────────────────── NAVBAR ───────────────────────────────── */}
+            <nav className="fixed inset-x-0 top-0 z-50 border-b bg-background/90 backdrop-blur">
+                <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
+                    {/* logo */}
+                    <button
+                        onClick={() => navigate("/")}
+                        className="text-lg font-bold tracking-tight"
+                    >
+                        Loop
+                    </button>
 
-                        {/* Search Bar */}
-                        <div className="flex-1 max-w-2xl mx-8">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Search videos..."
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                />
-                                <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Right side - Auth or User Menu */}
-                        <div className="flex items-center space-x-4">
-                            {!isAuthenticated ? (
-                                <div className="flex items-center space-x-2">
-                                    <button
-                                        onClick={() => handleAuthAction('login')}
-                                        className="px-4 py-2 text-red-600 border border-red-600 rounded-full hover:bg-red-50 transition-colors"
-                                    >
-                                        Sign In
-                                    </button>
-                                    <button
-                                        onClick={() => handleAuthAction('register')}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-                                    >
-                                        Sign Up
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="relative">
-                                    {/* Upload Button */}
-                                    <button
-                                        onClick={() => navigate('/upload')}
-                                        className="mr-4 p-2 text-gray-600 hover:bg-gray-100 rounded-full"
-                                        title="Upload Video"
-                                    >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </button>
-
-                                    {/* User Avatar */}
-                                    <button
-                                        onClick={() => setShowUserMenu(!showUserMenu)}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        {user?.avatar ? (
-                                            <img
-                                                src={user.avatar}
-                                                alt={user.fullname}
-                                                className="w-8 h-8 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                                <span className="text-gray-600 text-sm font-medium">
-                                                    {user?.fullname?.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </button>
-
-                                    {/* Dropdown Menu */}
-                                    {showUserMenu && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                            <button
-                                                onClick={() => navigate('/dashboard')}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                            >
-                                                Dashboard
-                                            </button>
-                                            <button
-                                                onClick={() => navigate('/profile')}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                            >
-                                                Your Channel
-                                            </button>
-                                            <hr className="my-1" />
-                                            <button
-                                                onClick={handleLogout}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                            >
-                                                Sign Out
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                    {/* search */}
+                    <div className="flex-1 max-w-md">
+                        <div className="relative">
+                            <Input
+                                type="search"
+                                placeholder="Search videos..."
+                                className="pl-4 pr-10"
+                            />
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                {/* simple search icon (svg) */}
+                                <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
+                                    />
+                                </svg>
+                            </span>
                         </div>
                     </div>
+
+                    {/* actions */}
+                    {!isAuthenticated ? (
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowLoginModal(true)}
+                            >
+                                Sign in
+                            </Button>
+                            <Button onClick={() => setShowRegisterModal(true)}>
+                                Sign up
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            {/* upload */}
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => navigate("/upload")}
+                                title="Upload"
+                            >
+                                <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </Button>
+
+                            {/* avatar + dropdown */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Avatar className="h-8 w-8 cursor-pointer">
+                                        <AvatarImage src={user?.avatar} alt={user?.fullname} />
+                                        <AvatarFallback>
+                                            {user?.fullname?.[0]?.toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem onSelect={() => navigate("/dashboard")}>
+                                        Dashboard
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={() => navigate("/profile")}>
+                                        Your channel
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onSelect={handleLogout}>
+                                        Sign out
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    )}
                 </div>
             </nav>
 
-            {/* Modals */}
+            {/* dark-mode toggle (demo) */}
+            
+
+            {/* auth modals */}
             <LoginModal
                 isOpen={showLoginModal}
                 onClose={() => setShowLoginModal(false)}
                 onSwitchToRegister={() => {
-                    setShowLoginModal(false);
-                    setShowRegisterModal(true);
+                    setShowLoginModal(false)
+                    setShowRegisterModal(true)
                 }}
             />
             <RegisterModal
                 isOpen={showRegisterModal}
                 onClose={() => setShowRegisterModal(false)}
                 onSwitchToLogin={() => {
-                    setShowRegisterModal(false);
-                    setShowLoginModal(true);
+                    setShowRegisterModal(false)
+                    setShowLoginModal(true)
                 }}
             />
         </>
-    );
-};
+    )
+}
 
-export default Navbar;
+export default Navbar
