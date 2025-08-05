@@ -1,8 +1,10 @@
 // src/components/home/VideoCard.jsx
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@/context/ThemeContext';  // Import here
 
 const VideoCard = ({ video }) => {
     const navigate = useNavigate();
+    const { theme } = useTheme();  // Use theme from context
 
     const formatViews = (views) => {
         if (views >= 1000000) {
@@ -16,7 +18,7 @@ const VideoCard = ({ video }) => {
     const formatTimeAgo = (date) => {
         const now = new Date();
         const diffInHours = Math.floor((now - new Date(date)) / (1000 * 60 * 60));
-        
+
         if (diffInHours < 24) {
             return `${diffInHours} hours ago`;
         } else {
@@ -25,9 +27,14 @@ const VideoCard = ({ video }) => {
         }
     };
 
+    // Conditional classes based on theme
+    const titleColor = theme === 'dark' ? 'text-gray-100 group-hover:text-white doto-font' : 'text-gray-900 doto-font group-hover:text-black';
+    const metaColor = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+    const durationBg = theme === 'dark' ? 'bg-gray-800/80' : 'bg-black/80';
+
     return (
-        <div 
-            className="group cursor-pointer card-hover animate-fade-in"
+        <div
+            className="group cursor-pointer"
             onClick={() => navigate(`/watch/${video._id}`)}
         >
             {/* Thumbnail */}
@@ -47,7 +54,7 @@ const VideoCard = ({ video }) => {
                 )}
                 
                 {/* Duration */}
-                <div className="absolute bottom-3 right-3 bg-gray-900/90 text-white text-xs px-2 py-1 rounded">
+                <div className={`absolute bottom-2 right-2 ${durationBg} text-white text-xs px-2 py-1 rounded`}>
                     {video.duration}
                 </div>
                 
@@ -73,10 +80,10 @@ const VideoCard = ({ video }) => {
 
                 {/* Video Details */}
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-emerald-100 line-clamp-2 group-hover:text-amber-300 transition-colors">
+                    <h3 className={`text-sm font-extrabold line-clamp-2 transition-colors ${titleColor}`}>
                         {video.title}
                     </h3>
-                    <p className="text-xs text-emerald-400 mt-1.5 flex items-center">
+                    <p className={`text-sm mt-1 ${metaColor}`}>
                         {video.owner.fullname}
                         {video.isLive && (
                             <span className="ml-2 px-1.5 py-0.5 bg-amber-900/30 text-amber-300 text-[10px] rounded border border-amber-700/30">
@@ -84,7 +91,7 @@ const VideoCard = ({ video }) => {
                             </span>
                         )}
                     </p>
-                    <p className="text-xs text-emerald-400/80 mt-1">
+                    <p className={`text-sm ${metaColor}`}>
                         {formatViews(video.views)} views • {formatTimeAgo(video.createdAt)}
                     </p>
                 </div>

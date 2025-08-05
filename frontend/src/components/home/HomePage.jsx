@@ -1,13 +1,10 @@
 // src/components/home/HomePage.jsx
 import { useState, useEffect } from 'react';
 import VideoGrid from './VideoGrid';
-import Hero from './Hero';
-import Logo from '../ui/Logo';
 
 const HomePage = () => {
     const [videos, setVideos] = useState([]);
-    const [loading, setLoading] = useState(true);
-
+    const [loading, setLoading] = useState(true);    
     // Mock data - replace with actual API call
     useEffect(() => {
         // Simulate API call
@@ -126,20 +123,9 @@ const HomePage = () => {
     }, []);
 
     return (
-        <div className="pt-16 bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen">
-            <Hero />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-emerald-300 flex items-center">
-                        <span className="mr-2">🔥</span> Trending Videos
-                    </h2>
-                    <button className="text-amber-300 hover:text-amber-200 text-sm font-medium flex items-center">
-                        View All
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
+        <div className="pt-16"> {/* Account for fixed navbar */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h2 className="text-2xl font-bold  mb-6 doto-font">Trending Videos</h2>
                 <VideoGrid videos={videos} loading={loading} />
             </div>
         </div>
