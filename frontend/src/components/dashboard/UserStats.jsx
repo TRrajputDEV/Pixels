@@ -1,76 +1,128 @@
 // src/components/dashboard/UserStats.jsx
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { 
+    Eye, 
+    Clock, 
+    Users, 
+    MessageSquare, 
+    TrendingUp,
+    TrendingDown,
+    Minus
+} from "lucide-react"
+
 const UserStats = ({ user }) => {
+    // Placeholder stats - replace with actual data from backend
     const stats = [
         {
             name: 'Total Views',
-            value: '24.5K',
-            icon: '👁️',
-            color: 'from-emerald-600 to-emerald-800',
-            change: '+12.3%'
+            value: '--',
+            icon: Eye,
+            change: null, // Will be populated from backend
+            description: 'Total video views'
         },
         {
             name: 'Watch Time',
-            value: '1,240 hrs',
-            icon: '⏱️',
-            color: 'from-amber-600 to-amber-800',
-            change: '+8.7%'
+            value: '-- hrs',
+            icon: Clock,
+            change: null,
+            description: 'Total watch hours'
         },
         {
-            name: 'New Subscribers',
-            value: '458',
-            icon: '👥',
-            color: 'from-emerald-600 to-emerald-800',
-            change: '+3.2%'
+            name: 'Subscribers',
+            value: '--',
+            icon: Users,
+            change: null,
+            description: 'Channel subscribers'
         },
         {
-            name: 'Engagement Rate',
-            value: '42.8%',
-            icon: '💬',
-            color: 'from-amber-600 to-amber-800',
-            change: '+5.1%'
+            name: 'Engagement',
+            value: '--%',
+            icon: MessageSquare,
+            change: null,
+            description: 'Average engagement rate'
         }
     ];
 
+    const getChangeIcon = (change) => {
+        if (!change) return <Minus className="h-3 w-3" />;
+        if (change > 0) return <TrendingUp className="h-3 w-3 text-green-500" />;
+        return <TrendingDown className="h-3 w-3 text-red-500" />;
+    };
+
+    const getChangeColor = (change) => {
+        if (!change) return 'secondary';
+        if (change > 0) return 'default';
+        return 'destructive';
+    };
+
     return (
-        <div className="bg-gradient-to-b from-gray-900 to-gray-950 border border-emerald-900/30 rounded-2xl shadow-lg shadow-emerald-900/10 overflow-hidden">
-            <div className="px-5 py-6 sm:p-6">
-                <div className="flex justify-between items-center mb-5">
-                    <h3 className="text-lg font-bold text-emerald-300">
-                        Analytics Overview
-                    </h3>
-                    <span className="text-sm text-emerald-400/80">Last 30 days</span>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div>
+                    <CardTitle className="text-lg font-semibold">Analytics Overview</CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground">
+                        Your content performance metrics
+                    </CardDescription>
                 </div>
-                
+                <Badge variant="outline" className="text-xs">
+                    Last 30 days
+                </Badge>
+            </CardHeader>
+            <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {stats.map((stat, index) => (
-                        <div 
-                            key={index} 
-                            className="bg-gradient-to-b from-gray-900 to-gray-950 border border-emerald-900/30 rounded-xl p-5 hover:border-emerald-500/50 transition-all duration-300"
-                        >
-                            <div className="flex items-center">
-                                <div className={`bg-gradient-to-br ${stat.color} rounded-xl p-3 text-white text-2xl mr-4`}>
-                                    {stat.icon}
+                    {stats.map((stat, index) => {
+                        const IconComponent = stat.icon;
+                        return (
+                            <div 
+                                key={index} 
+                                className="flex flex-col space-y-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="p-2 bg-primary/10 rounded-md">
+                                        <IconComponent className="h-4 w-4 text-primary" />
+                                    </div>
+                                    {stat.change !== null && (
+                                        <Badge 
+                                            variant={getChangeColor(stat.change)} 
+                                            className="text-xs px-2 py-1 h-auto"
+                                        >
+                                            {getChangeIcon(stat.change)}
+                                            <span className="ml-1">
+                                                {stat.change ? `${stat.change > 0 ? '+' : ''}${stat.change}%` : '--'}
+                                            </span>
+                                        </Badge>
+                                    )}
                                 </div>
-                                <div>
-                                    <p className="text-sm text-emerald-400/80">
-                                        {stat.name}
-                                    </p>
-                                    <p className="text-2xl font-bold text-amber-300">
+                                
+                                <div className="space-y-1">
+                                    <p className="text-2xl font-bold doto-font">
                                         {stat.value}
                                     </p>
-                                    <div className="text-xs mt-1 text-emerald-400 flex items-center">
-                                        <svg className="w-4 h-4 mr-1 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                        </svg>
-                                        {stat.change}
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            {stat.name}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {stat.description}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
-            </div>
-        </div>
+                
+                {/* Placeholder message for when backend is not connected */}
+                <div className="mt-6 p-4 bg-muted/30 rounded-lg border-dashed border-2 border-muted-foreground/20">
+                    <div className="text-center text-muted-foreground">
+                        <TrendingUp className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                        <p className="text-sm font-medium mb-1">Analytics data will appear here</p>
+                        <p className="text-xs">Coming soon</p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 
