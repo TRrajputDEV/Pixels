@@ -1,15 +1,31 @@
 // src/components/layout/Navbar.jsx
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { 
-    Search, 
-    Upload, 
-    Moon, 
-    Sun, 
-    Film 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar"
+import {
+    Search,
+    Upload,
+    Moon,
+    Sun,
+    Film,
+    LayoutDashboard,
+    User,
+    LogOut
 } from "lucide-react"
 import LoginModal from "@/components/auth/LoginModal"
 import RegisterModal from "@/components/auth/RegisterModal"
@@ -22,6 +38,7 @@ const Navbar = () => {
     const [showRegisterModal, setShowRegisterModal] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const navigate = useNavigate()
+    const location = useLocation()
 
     const handleLogout = async () => {
         await logout()
@@ -35,21 +52,25 @@ const Navbar = () => {
         }
     }
 
+    // Helper to check if a nav item is active
+    const isActive = (path) => {
+        return location.pathname === path;
+    }
+
     return (
         <>
-            <nav className="fixed inset-x-0 top-0 z-50  bg-background text-foreground transition-colors duration-300">
+            <nav className="fixed inset-x-0 top-0 z-50 bg-background text-foreground transition-colors duration-300 border-b">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
                     {/* Logo */}
-                    <Link 
-                        to="/" 
+                    <Link
+                        to="/"
                         className="flex items-center gap-2 text-lg font-bold tracking-tight"
                     >
-                        {/* <Film className="h-6 w-6 text-primary" /> */}
                         <span className="doto-font-heading text-2xl font-extrabold">Pixels</span>
                     </Link>
 
                     {/* Search */}
-                    <form 
+                    <form
                         onSubmit={handleSearch}
                         className="flex-1 max-w-2xl doto-font font-extrabold"
                     >
@@ -74,7 +95,6 @@ const Navbar = () => {
                             size="icon"
                             variant="ghost"
                             onClick={toggleTheme}
-                            
                         >
                             {theme === "dark" ? (
                                 <Sun className="h-5 w-5" />
@@ -87,14 +107,15 @@ const Navbar = () => {
                             <>
                                 <Button
                                     variant="outline"
-                                    className="doto-font-button "
+                                    className="doto-font-button"
                                     onClick={() => setShowLoginModal(true)}
                                 >
                                     Sign in
                                 </Button>
                                 <Button
-                                className="doto-font-button "
-                                onClick={() => setShowRegisterModal(true)}>
+                                    className="doto-font-button"
+                                    onClick={() => setShowRegisterModal(true)}
+                                >
                                     Sign up
                                 </Button>
                             </>
@@ -102,25 +123,55 @@ const Navbar = () => {
                             <>
                                 <Button
                                     size="icon"
-                                    variant="ghost"
-                                    className="doto-font-button "
+                                    variant={isActive("/upload") ? "secondary" : "ghost"}
+                                    className="doto-font-button"
                                     onClick={() => navigate("/upload")}
                                 >
                                     <Upload className="h-5 w-5" />
                                 </Button>
-                                
-                                <div className="flex items-center gap-2 ml-2">
-                                    <span className="text-sm doto-font  hidden sm:block">
-                                        Hi, {user?.fullname || user?.username}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        className="doto-font-button "
-                                        onClick={handleLogout}
-                                    >
-                                        Sign out
-                                    </Button>
-                                </div>
+
+                                {/* User Dropdown */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <div className="flex items-center gap-2 cursor-pointer ml-2">
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage
+                                                    src={user?.avatar || "/default-avatar.png"}
+                                                    alt={user?.fullname || user?.username}
+                                                />
+                                                <AvatarFallback className="bg-primary text-primary-foreground">
+                                                    {user?.fullname?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || "U"}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </div>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-56">
+                                        <DropdownMenuLabel className="font-normal">
+                                            <div className="flex flex-col space-y-1">
+                                                <p className="text-sm font-medium leading-none">
+                                                    {user?.fullname || user?.username || "User"}
+                                                </p>
+                                                <p className="text-xs leading-none text-muted-foreground">
+                                                    {user?.email || ""}
+                                                </p>
+                                            </div>
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                                            Dashboard
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => navigate("/profile")}>
+                                            <User className="mr-2 h-4 w-4" />
+                                            Your Profile
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={handleLogout}>
+                                            <LogOut className="mr-2 h-4 w-4" />
+                                            Sign out
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </>
                         )}
                     </div>
