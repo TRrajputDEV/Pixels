@@ -1,20 +1,29 @@
 // src/components/auth/AuthGuard.jsx
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2, Film, Shield } from "lucide-react"
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
 
 const AuthGuard = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
-    const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated);
+    const [showLoginModal, setShowLoginModal] = useState(false);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-950">
-                <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 border-4 border-emerald-500 border-t-emerald-800 rounded-full animate-spin"></div>
-                    <p className="mt-4 text-emerald-300">Authenticating...</p>
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="flex items-center gap-2 text-2xl font-bold">
+                        <Film className="h-8 w-8 text-primary animate-pulse" />
+                        <span className="doto-font-heading font-extrabold">Pixels</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Authenticating...</span>
+                    </div>
                 </div>
             </div>
         );
@@ -23,25 +32,38 @@ const AuthGuard = ({ children }) => {
     if (!isAuthenticated) {
         return (
             <>
-                <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-950">
-                    <div className="text-center max-w-md px-4">
-                        <div className="flex justify-center mb-6">
-                            <div className="w-20 h-20 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center">
-                                <div className="w-8 h-8 border-2 border-amber-300 rounded-full border-dashed animate-spin-slow"></div>
-                            </div>
-                        </div>
-                        <h2 className="text-2xl font-bold text-emerald-300 mb-4">
-                            Premium Content Access
-                        </h2>
-                        <p className="text-emerald-400/80 mb-6">
-                            Sign in to access exclusive content and features
-                        </p>
-                        <button
-                            onClick={() => setShowLoginModal(true)}
-                            className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white rounded-xl hover:from-emerald-500 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-emerald-700/30"
-                        >
-                            Sign In
-                        </button>
+                <div className="min-h-screen flex items-center justify-center bg-background p-4">
+                    <div className="w-full max-w-md">
+                        <Card className="text-center">
+                            <CardHeader className="space-y-4">
+                                <div className="flex justify-center">
+                                    <div className="p-3 bg-primary/10 rounded-full">
+                                        <Shield className="h-8 w-8 text-primary" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <CardTitle className="text-xl">Authentication Required</CardTitle>
+                                    <CardDescription>
+                                        Sign in to access exclusive content and features
+                                    </CardDescription>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <Button
+                                    onClick={() => setShowLoginModal(true)}
+                                    className="w-full"
+                                >
+                                    Sign In
+                                </Button>
+                                <Button
+                                    onClick={() => setShowRegisterModal(true)}
+                                    variant="outline"
+                                    className="w-full"
+                                >
+                                    Create Account
+                                </Button>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
 
