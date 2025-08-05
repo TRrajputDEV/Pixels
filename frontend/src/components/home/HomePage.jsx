@@ -4,12 +4,13 @@ import VideoGrid from './VideoGrid';
 
 const HomePage = () => {
     const [videos, setVideos] = useState([]);
-    const [loading, setLoading] = useState(true);    
-    // Mock data - replace with actual API call
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        // Simulate API call
         setTimeout(() => {
             setVideos([
+                // ... same video data as before ...
+
                 {
                     _id: '1',
                     title: 'Amazing Nature Documentary: Exploring the Amazon Rainforest',
@@ -123,9 +124,9 @@ const HomePage = () => {
     }, []);
 
     return (
-        <div className="pt-16"> {/* Account for fixed navbar */}
+        <div className="pt-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 className="text-2xl font-bold  mb-6 doto-font">Trending Videos</h2>
+                <h2 className="text-2xl font-bold mb-6 doto-font-heading">Trending Videos</h2>
                 <VideoGrid videos={videos} loading={loading} />
             </div>
         </div>
