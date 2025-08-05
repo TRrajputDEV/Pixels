@@ -1,9 +1,34 @@
 /* src/index.css */
+
+/* Import Doto font (from your provided URL) */
+@import url('https://fonts.googleapis.com/css2?family=Doto:wght@100..900&display=swap');
+
+/* Tailwind directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Base layer for themes */
 @layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; /* Default font (not Doto) */
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+  }
+
+  button, .btn {
+    font-weight: 200;
+  }
+
   :root {
     /* DEFAULT LIGHT THEME */
     --background: 0 0% 100%;                /* Pure white background */
@@ -35,7 +60,7 @@
 
   .dark {
     /* DARK THEME - ONLY WHEN class="dark" is added */
-    --background: 0 0% 3.9%;                /* Very dark background */
+    --background: 0 0% 0%;                /* Very dark slate background */
     --foreground: 0 0% 98%;                 /* Almost white text */
     --card: 0 0% 3.9%;                      /* Dark cards */
     --card-foreground: 0 0% 98%;            /* Light text on cards */
@@ -62,13 +87,20 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
+/* Utility classes to apply 'Doto' font selectively (only where you add the class) */
+@layer utilities {
+  .doto-font {
+    font-family: 'Doto', sans-serif !important;
+    font-weight: bolder;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  .doto-font-heading {
+    font-family: 'Doto', sans-serif !important;
+    font-weight: 700; /* Bold for headings */
+  }
+
+  .doto-font-button {
+    font-family: 'Doto', sans-serif !important;
+    font-weight: 600; /* Semi-bold for buttons */
   }
 }
-

@@ -1,12 +1,10 @@
 // src/components/home/HomePage.jsx
 import { useState, useEffect } from 'react';
 import VideoGrid from './VideoGrid';
-import Hero from './Hero';
 
 const HomePage = () => {
     const [videos, setVideos] = useState([]);
-    const [loading, setLoading] = useState(true);
-
+    const [loading, setLoading] = useState(true);    
     // Mock data - replace with actual API call
     useEffect(() => {
         // Simulate API call
@@ -46,9 +44,8 @@ const HomePage = () => {
 
     return (
         <div className="pt-16"> {/* Account for fixed navbar */}
-            <Hero />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Trending Videos</h2>
+                <h2 className="text-2xl font-bold  mb-6 doto-font">Trending Videos</h2>
                 <VideoGrid videos={videos} loading={loading} />
             </div>
         </div>

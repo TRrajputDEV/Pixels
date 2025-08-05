@@ -37,26 +37,26 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="fixed inset-x-0 top-0 z-50 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+            <nav className="fixed inset-x-0 top-0 z-50  bg-background text-foreground transition-colors duration-300">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
                     {/* Logo */}
                     <Link 
                         to="/" 
                         className="flex items-center gap-2 text-lg font-bold tracking-tight"
                     >
-                        <Film className="h-6 w-6 text-primary" />
-                        <span>Loop</span>
+                        {/* <Film className="h-6 w-6 text-primary" /> */}
+                        <span className="doto-font-heading text-2xl font-extrabold">Pixels</span>
                     </Link>
 
                     {/* Search */}
                     <form 
                         onSubmit={handleSearch}
-                        className="flex-1 max-w-2xl"
+                        className="flex-1 max-w-2xl doto-font font-extrabold"
                     >
                         <div className="relative">
                             <Input
                                 type="search"
-                                placeholder="Search videos..."
+                                placeholder="watch Pixels moving...."
                                 className="pl-10 pr-4 py-5 text-base"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -74,6 +74,7 @@ const Navbar = () => {
                             size="icon"
                             variant="ghost"
                             onClick={toggleTheme}
+                            
                         >
                             {theme === "dark" ? (
                                 <Sun className="h-5 w-5" />
@@ -86,11 +87,14 @@ const Navbar = () => {
                             <>
                                 <Button
                                     variant="outline"
+                                    className="doto-font-button "
                                     onClick={() => setShowLoginModal(true)}
                                 >
                                     Sign in
                                 </Button>
-                                <Button onClick={() => setShowRegisterModal(true)}>
+                                <Button
+                                className="doto-font-button "
+                                onClick={() => setShowRegisterModal(true)}>
                                     Sign up
                                 </Button>
                             </>
@@ -99,17 +103,19 @@ const Navbar = () => {
                                 <Button
                                     size="icon"
                                     variant="ghost"
+                                    className="doto-font-button "
                                     onClick={() => navigate("/upload")}
                                 >
                                     <Upload className="h-5 w-5" />
                                 </Button>
                                 
                                 <div className="flex items-center gap-2 ml-2">
-                                    <span className="text-sm font-medium hidden sm:block">
+                                    <span className="text-sm doto-font  hidden sm:block">
                                         Hi, {user?.fullname || user?.username}
                                     </span>
                                     <Button
                                         variant="outline"
+                                        className="doto-font-button "
                                         onClick={handleLogout}
                                     >
                                         Sign out
