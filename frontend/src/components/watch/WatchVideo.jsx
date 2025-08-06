@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import VideoLikeButton from "@/components/ui/VideoLikeButton"
 
 import {
     ThumbsUp,
@@ -343,25 +344,11 @@ const WatchVideo = () => {
 
                             {/* Action Buttons */}
                             <div className="flex items-center gap-2 flex-wrap">
-                                <Button
-                                    variant={isLiked ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={handleLike}
-                                    className="doto-font-button"
-                                >
-                                    <ThumbsUp className="h-4 w-4 mr-2" />
-                                    Like
-                                </Button>
-
-                                <Button
-                                    variant={isDisliked ? "destructive" : "outline"}
-                                    size="sm"
-                                    onClick={handleDislike}
-                                    className="doto-font-button"
-                                >
-                                    <ThumbsDown className="h-4 w-4 mr-2" />
-                                    Dislike
-                                </Button>
+                                <VideoLikeButton
+                                    videoId={video._id}
+                                    initialLikeCount={0} // You can get this from backend later
+                                    initialIsLiked={false} // You can get this from backend later
+                                />
 
                                 <Button
                                     variant="outline"
@@ -446,7 +433,7 @@ const WatchVideo = () => {
                         {/* Comments Section */}
                         <CommentSection videoId={videoId} />
 
-                        
+
                     </div>
 
                     {/* Sidebar - Related Videos */}

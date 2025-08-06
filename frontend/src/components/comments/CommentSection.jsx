@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import CommentLikeButton from "@/components/ui/CommentLikeButton"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -392,9 +393,20 @@ const CommentSection = ({ videoId }) => {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="mt-2 text-sm leading-relaxed doto-font">
-                                                {comment.content}
-                                            </p>
+                                            <div className="mt-2 space-y-2">
+                                                <p className="text-sm leading-relaxed doto-font">
+                                                    {comment.content}
+                                                </p>
+
+                                                {/* Comment Actions - Like Button */}
+                                                <div className="flex items-center gap-2 pt-1">
+                                                    <CommentLikeButton
+                                                        commentId={comment._id}
+                                                        initialLikeCount={0} // Will be updated when you add like counts to backend
+                                                        initialIsLiked={false} // Will be updated when you add user like status
+                                                    />
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -403,6 +415,7 @@ const CommentSection = ({ videoId }) => {
                     ))
                 )}
             </div>
+
         </div>
     )
 }
