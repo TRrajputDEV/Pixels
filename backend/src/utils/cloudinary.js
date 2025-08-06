@@ -1,5 +1,5 @@
+// src/utils/cloudinary.js
 import { v2 as cloudinary } from "cloudinary";
-import { response } from "express";
 import fs from 'fs'
 
 cloudinary.config({
@@ -8,26 +8,85 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath, resourceType = "auto") => {
     try {
         if (!localFilePath) return null;
 
-        const result = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto"
-        });
+        // Check if file exists before uploading
+        if (!fs.existsSync(localFilePath)) {
+            console.error("File does not exist:", localFilePath);
+            return null;
+        }
 
-        // delete the temp file after successful upload
+        // Upload configuration
+        const uploadOptions = {
+            resource_type: resourceType,
+            folder: "pixels-videos", // Organize uploads in folders
+            use_filename: true,
+            unique_filename: false,
+        };
+
+        // For videos, add video-specific options
+        if (resourceType === "video") {
+            uploadOptions.eager = [
+                { width: 300, height: 200, crop: "fill", format: "jpg" }, // Generate thumbnail
+            ];
+            uploadOptions.eager_async = true;
+        }
+
+        const result = await cloudinary.uploader.upload(localFilePath, uploadOptions);
+
+        // Clean up temp file after successful upload
         fs.unlinkSync(localFilePath);
+        
+        console.log("File uploaded successfully:", result.secure_url);
+        return result;
 
-        console.log("file is uploaded ", result.secure_url);
-
-        return result; // return actual cloudinary response
     } catch (error) {
-        console.error("Cloudinary upload failed: ", error);
-        fs.unlinkSync(localFilePath); // remove temp file on error too
+        console.error("Cloudinary upload failed:", error);
+        
+        // Clean up temp file on error
+        if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+        }
+        
         return null;
     }
 }
 
+// For large video files (>100MB)
+const uploadLargeVideoOnCloudinary = async (localFilePath) => {
+    return new Promise((resolve, reject) => {
+        if (!localFilePath) {
+            resolve(null);
+            return;
+        }
 
-export {uploadOnCloudinary}
+        cloudinary.uploader.upload_large(
+            localFilePath,
+            {
+                resource_type: "video",
+                folder: "pixels-videos",
+                chunk_size: 20000000, // 20MB chunks
+                use_filename: true,
+                unique_filename: false,
+            },
+            (error, result) => {
+                // Clean up temp file
+                if (fs.existsSync(localFilePath)) {
+                    fs.unlinkSync(localFilePath);
+                }
+
+                if (error) {
+                    console.error("Large video upload failed:", error);
+                    reject(error);
+                } else {
+                    console.log("Large video uploaded:", result.secure_url);
+                    resolve(result);
+                }
+            }
+        );
+    });
+};
+
+export { uploadOnCloudinary, uploadLargeVideoOnCloudinary }
