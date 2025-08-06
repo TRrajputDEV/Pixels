@@ -6,9 +6,9 @@ import { useAuth } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import likeService from "@/services/LikeService"
 
-const VideoLikeButton = ({ 
-    videoId, 
-    initialLikeCount = 0, 
+const VideoLikeButton = ({
+    videoId,
+    initialLikeCount = 0,
     initialIsLiked = false,
     variant = "outline",
     size = "sm",
@@ -33,6 +33,15 @@ const VideoLikeButton = ({
                 title: "Login Required",
                 description: "You must be logged in to like videos",
                 variant: "destructive",
+                action: (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {/* trigger login modal */ }}
+                    >
+                        Sign In
+                    </Button>
+                )
             })
             return
         }
@@ -48,13 +57,13 @@ const VideoLikeButton = ({
 
         try {
             setIsLoading(true)
-            
+
             const result = await likeService.toggleVideoLike(videoId)
 
             if (result.success) {
                 setIsLiked(result.data.isLiked)
                 setLikeCount(result.data.likeCount)
-                
+
                 toast({
                     title: result.data.isLiked ? "Liked!" : "Unliked",
                     description: result.message,

@@ -16,20 +16,26 @@ class VideoService {
     }
 
     // Make authenticated requests with token
+    // src/services/VideoService.js
+    // Update the request method to handle missing auth gracefully
+
     async request(endpoint, options = {}) {
         try {
-            const headers = {
-                ...this.getAuthHeaders(),
-                ...(options.headers || {})
-            };
+            const headers = {};
 
-            // Only set Content-Type for JSON requests
+            // Get token from localStorage (don't throw error if missing)
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            // Note: No auth header if no token - let backend decide what to allow
+
             if (options.body && typeof options.body === 'string') {
                 headers['Content-Type'] = 'application/json';
             }
 
             const response = await fetch(`${this.baseURL}${endpoint}`, {
-                headers,
+                headers: { ...headers, ...(options.headers || {}) },
                 ...options,
                 credentials: 'include',
             });
@@ -55,6 +61,7 @@ class VideoService {
             return { error: error.message || 'Network error', success: false };
         }
     }
+
 
     // ===== VIDEO CRUD OPERATIONS =====
 

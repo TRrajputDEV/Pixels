@@ -1,3 +1,4 @@
+// src/routes/comment.routes.js
 import { Router } from 'express';
 import {
     addComment,
@@ -9,9 +10,12 @@ import {VerifyJWT} from "../middlewares/auth.middleware.js"
 
 const router = Router();
 
-router.use(VerifyJWT); // Apply verifyJWT middleware to all routes in this file
+// Public route - anyone can read comments
+router.route("/:videoId").get(getVideoComments);
 
-router.route("/:videoId").get(getVideoComments).post(addComment);
+// Protected routes - auth required for interactions
+router.use(VerifyJWT);
+router.route("/:videoId").post(addComment);
 router.route("/c/:commentId").delete(deleteComment).patch(updateComment);
 
 export default router
