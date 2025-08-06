@@ -221,6 +221,40 @@ class VideoService {
         return this.getVideoById(videoId);
     }
 
+    // Add these methods to your existing src/services/VideoService.js
+
+    // Search videos by query
+    async searchVideos(query, params = {}) {
+        if (!query || !query.trim()) {
+            return { error: 'Search query is required', success: false };
+        }
+
+        const queryString = new URLSearchParams();
+
+        // Add search query
+        queryString.append('query', query.trim());
+
+        // Add other parameters
+        if (params.page) queryString.append('page', params.page);
+        if (params.limit) queryString.append('limit', params.limit);
+        if (params.sortBy) queryString.append('sortBy', params.sortBy);
+        if (params.sortType) queryString.append('sortType', params.sortType);
+        if (params.userId) queryString.append('userId', params.userId);
+
+        const endpoint = `/videos?${queryString}`;
+        return this.request(endpoint);
+    }
+
+    // Get search suggestions (optional - for autocomplete)
+    async getSearchSuggestions(query) {
+        if (!query || query.trim().length < 2) {
+            return { success: true, data: [] };
+        }
+
+        return this.searchVideos(query, { limit: 5 });
+    }
+
+
 }
 
 const videoService = new VideoService();

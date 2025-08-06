@@ -8,6 +8,7 @@ import LoginForm from './components/auth/LoginForm';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import VideoUpload from "@/components/upload/VideoUpload"
 import WatchVideo from "@/components/watch/WatchVideo"
+import SearchResults from "@/components/search/SearchResults"
 function App() {
     return (
         <AuthProvider>
@@ -35,6 +36,7 @@ function App() {
                                 }
                             />
                             <Route path="/watch/:videoId" element={<WatchVideo />} />
+                            <Route path="/search" element={<SearchResults />} />
                         </Routes>
                     </main>
                 </div>
