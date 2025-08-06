@@ -2,121 +2,163 @@
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/context/ThemeContext';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Eye, Clock, User } from 'lucide-react';
 
 const VideoCard = ({ video }) => {
     const navigate = useNavigate();
     const { theme } = useTheme();
 
     const formatViews = (views) => {
-        if (views >= 1000000) {
-            return `${(views / 1000000).toFixed(1)}M views`;
-        } else if (views >= 1000) {
-            return `${(views / 1000).toFixed(1)}K views`;
+        const viewCount = views || 0;
+        if (viewCount >= 1000000) {
+            return `${(viewCount / 1000000).toFixed(1)}M`;
+        } else if (viewCount >= 1000) {
+            return `${(viewCount / 1000).toFixed(1)}K`;
         }
-        return `${views} views`;
+        return `${viewCount}`;
     };
 
     const formatTimeAgo = (date) => {
         const now = new Date();
         const diffInHours = Math.floor((now - new Date(date)) / (1000 * 60 * 60));
 
-        if (diffInHours < 24) {
+        if (diffInHours < 1) {
+            return 'Just now';
+        } else if (diffInHours < 24) {
             return `${diffInHours}h ago`;
         } else {
             const diffInDays = Math.floor(diffInHours / 24);
-            return `${diffInDays}d ago`;
+            if (diffInDays < 30) {
+                return `${diffInDays}d ago`;
+            } else if (diffInDays < 365) {
+                const diffInMonths = Math.floor(diffInDays / 30);
+                return `${diffInMonths}mo ago`;
+            } else {
+                const diffInYears = Math.floor(diffInDays / 365);
+                return `${diffInYears}y ago`;
+            }
         }
     };
 
-    // Theme-based classes
-    const cardBg = theme === 'dark' ? 'bg-card-dark' : 'bg-card-light';
-    const titleColor = theme === 'dark' ? 'text-foreground-dark' : 'text-foreground-light';
-    const metaColor = theme === 'dark' ? 'text-muted-dark' : 'text-muted-light';
+    const formatDuration = (duration) => {
+        if (typeof duration === 'string') return duration;
+        if (typeof duration === 'number') {
+            const minutes = Math.floor(duration / 60);
+            const seconds = Math.floor(duration % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        return '0:00';
+    };
+
+    // Fallback for missing data
+    const safeVideo = {
+        _id: video?._id || '',
+        title: video?.title || 'Untitled Video',
+        thumbnail: video?.thumbnail || '/placeholder-video.jpg',
+        duration: video?.duration || 0,
+        view: video?.view || video?.views || 0,
+        createdAt: video?.createdAt || new Date(),
+        owner: {
+            fullname: video?.owner?.fullname || 'Unknown Creator',
+            username: video?.owner?.username || 'unknown',
+            avatar: video?.owner?.avatar || '/placeholder-avatar.jpg'
+        },
+        isPublished: video?.isPublished !== false
+    };
 
     return (
-        <div
-            className={`group cursor-pointer rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl ${cardBg}`}
-            onClick={() => navigate(`/watch/${video._id}`)}
+        <Card 
+            className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg border-0"
+            onClick={() => navigate(`/watch/${safeVideo._id}`)}
         >
-            {/* Thumbnail */}
+            {/* Thumbnail with metadata */}
             <div className="relative aspect-video overflow-hidden">
                 <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    src={safeVideo.thumbnail}
+                    alt={safeVideo.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                        e.target.src = '/placeholder-video.jpg';
+                    }}
                 />
                 
-                {/* Live indicator */}
-                {video.isLive && (
-                    <div className="absolute top-3 left-3">
-                        <Badge variant="destructive" className="flex items-center px-2 py-1">
-                            <span className="w-2 h-2 bg-white rounded-full mr-1.5 animate-pulse"></span>
-                            LIVE
-                        </Badge>
-                    </div>
-                )}
-                
                 {/* Duration */}
-                <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm text-foreground text-xs px-2 py-1 rounded">
-                    {video.duration}
-                </div>
+                <Badge 
+                    variant="secondary" 
+                    className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm text-foreground flex items-center gap-1 px-2 py-1"
+                >
+                    <Clock className="h-3 w-3" />
+                    <span className="text-xs font-medium">{formatDuration(safeVideo.duration)}</span>
+                </Badge>
                 
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {/* Status Badge */}
+                {!safeVideo.isPublished && (
+                    <Badge 
+                        variant="outline" 
+                        className="absolute top-3 left-3 bg-destructive/80 backdrop-blur-sm text-destructive-foreground px-2 py-1"
+                    >
+                        <span className="text-xs font-medium">UNLISTED</span>
+                    </Badge>
+                )}
             </div>
 
-            {/* Video Info */}
-            <div className="p-4">
-                <div className="flex items-start space-x-3">
-                    {/* Channel Avatar */}
-                    <div className="flex-shrink-0">
-                        <div className="relative">
+            {/* Card Content - Video Metadata */}
+            <CardContent className="p-4 pb-2">
+                <h3 className="font-bold line-clamp-2 mb-2 group-hover:text-primary transition-colors doto-font text-base">
+                    {safeVideo.title}
+                </h3>
+                
+                <div className="flex items-center gap-3 text-muted-foreground mt-3 text-sm">
+                    <div className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        <span>{formatViews(safeVideo.view)} views</span>
+                    </div>
+                    <span className="text-muted">•</span>
+                    <span>{formatTimeAgo(safeVideo.createdAt)}</span>
+                </div>
+            </CardContent>
+
+            {/* Card Footer - Creator Info */}
+            <CardFooter className="p-4 pt-0">
+                <div className="flex items-center gap-3 w-full">
+                    <div className="relative">
+                        <div className="w-8 h-8 rounded-full border border-border overflow-hidden flex-shrink-0">
                             <img
-                                src={video.owner.avatar}
-                                alt={video.owner.fullname}
-                                className="w-10 h-10 rounded-full border-2 border-primary"
+                                src={safeVideo.owner.avatar}
+                                alt={safeVideo.owner.fullname}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    e.target.src = '/placeholder-avatar.jpg';
+                                }}
                             />
                         </div>
                     </div>
-
-                    {/* Video Details */}
+                    
                     <div className="flex-1 min-w-0">
-                        <h3 className={`font-bold line-clamp-2 mb-1 transition-colors doto-font ${titleColor}`}>
-                            {video.title}
-                        </h3>
-                        <div className="flex items-center flex-wrap gap-2">
-                            <p className={`text-sm ${metaColor}`}>
-                                {video.owner.fullname}
-                            </p>
-                            {video.isLive && (
-                                <Badge variant="secondary" className="text-xs">
-                                    LIVE NOW
-                                </Badge>
-                            )}
-                        </div>
-                        <p className={`text-sm mt-1 ${metaColor}`}>
-                            {formatViews(video.views)} • {formatTimeAgo(video.createdAt)}
+                        <p className="text-sm font-medium truncate text-foreground">
+                            {safeVideo.owner.fullname}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                            @{safeVideo.owner.username}
                         </p>
                     </div>
-                </div>
-                
-                {/* Action Button */}
-                <div className="mt-3 flex justify-end">
+                    
                     <Button 
-                        variant="outline" 
                         size="sm"
-                        className="doto-font-button"
+                        variant="outline"
+                        className="doto-font-button text-xs h-7 px-2"
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/watch/${video._id}`);
+                            navigate(`/channel/${safeVideo.owner.username}`);
                         }}
                     >
-                        Watch
+                        View
                     </Button>
                 </div>
-            </div>
-        </div>
+            </CardFooter>
+        </Card>
     );
 };
 

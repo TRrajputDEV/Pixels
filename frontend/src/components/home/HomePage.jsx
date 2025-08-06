@@ -1,133 +1,96 @@
 // src/components/home/HomePage.jsx
 import { useState, useEffect } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 import VideoGrid from './VideoGrid';
+import videoService from '@/services/VideoService';
 
 const HomePage = () => {
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    // Fetch videos from backend
     useEffect(() => {
-        setTimeout(() => {
-            setVideos([
-                // ... same video data as before ...
-
-                {
-                    _id: '1',
-                    title: 'Amazing Nature Documentary: Exploring the Amazon Rainforest',
-                    thumbnail: 'https://picsum.photos/320/180?random=1',
-                    duration: '15:30',
-                    views: 1500000,
-                    createdAt: new Date(Date.now() - 86400000),
-                    owner: {
-                        fullname: 'Nature Channel',
-                        username: 'naturechannel',
-                        avatar: 'https://picsum.photos/40/40?random=10'
-                    },
-                    isLive: true
-                },
-                {
-                    _id: '2',
-                    title: 'Tech Review: Latest Smartphone Features You Need to Know',
-                    thumbnail: 'https://picsum.photos/320/180?random=2',
-                    duration: '12:45',
-                    views: 850000,
-                    createdAt: new Date(Date.now() - 172800000),
-                    owner: {
-                        fullname: 'Tech Guru',
-                        username: 'techguru',
-                        avatar: 'https://picsum.photos/40/40?random=11'
-                    }
-                },
-                {
-                    _id: '3',
-                    title: 'Cooking Masterclass: Secrets of Michelin Star Chefs',
-                    thumbnail: 'https://picsum.photos/320/180?random=3',
-                    duration: '24:18',
-                    views: 320000,
-                    createdAt: new Date(Date.now() - 259200000),
-                    owner: {
-                        fullname: 'Culinary Arts',
-                        username: 'culinaryarts',
-                        avatar: 'https://picsum.photos/40/40?random=12'
-                    }
-                },
-                {
-                    _id: '4',
-                    title: 'Workout Routine: Transform Your Body in 30 Days',
-                    thumbnail: 'https://picsum.photos/320/180?random=4',
-                    duration: '18:22',
-                    views: 920000,
-                    createdAt: new Date(Date.now() - 345600000),
-                    owner: {
-                        fullname: 'Fitness Pro',
-                        username: 'fitnesspro',
-                        avatar: 'https://picsum.photos/40/40?random=13'
-                    },
-                    isLive: true
-                },
-                {
-                    _id: '5',
-                    title: 'Music Production: How to Create Professional Beats',
-                    thumbnail: 'https://picsum.photos/320/180?random=5',
-                    duration: '28:45',
-                    views: 450000,
-                    createdAt: new Date(Date.now() - 432000000),
-                    owner: {
-                        fullname: 'Beat Master',
-                        username: 'beatmaster',
-                        avatar: 'https://picsum.photos/40/40?random=14'
-                    }
-                },
-                {
-                    _id: '6',
-                    title: 'Travel Vlog: Exploring Hidden Gems of Japan',
-                    thumbnail: 'https://picsum.photos/320/180?random=6',
-                    duration: '22:30',
-                    views: 780000,
-                    createdAt: new Date(Date.now() - 518400000),
-                    owner: {
-                        fullname: 'Global Explorer',
-                        username: 'globalexplorer',
-                        avatar: 'https://picsum.photos/40/40?random=15'
-                    }
-                },
-                {
-                    _id: '7',
-                    title: 'Gaming: Breaking Records in the Newest Release',
-                    thumbnail: 'https://picsum.photos/320/180?random=7',
-                    duration: '36:15',
-                    views: 2100000,
-                    createdAt: new Date(Date.now() - 604800000),
-                    owner: {
-                        fullname: 'Pro Gamer',
-                        username: 'progamer',
-                        avatar: 'https://picsum.photos/40/40?random=16'
-                    },
-                    isLive: true
-                },
-                {
-                    _id: '8',
-                    title: 'Art Tutorial: Mastering Watercolor Techniques',
-                    thumbnail: 'https://picsum.photos/320/180?random=8',
-                    duration: '19:40',
-                    views: 360000,
-                    createdAt: new Date(Date.now() - 691200000),
-                    owner: {
-                        fullname: 'Art Studio',
-                        username: 'artstudio',
-                        avatar: 'https://picsum.photos/40/40?random=17'
-                    }
+        const fetchVideos = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                // Fetch latest videos from your backend
+                const result = await videoService.getLatestVideos({
+                    page: 1,
+                    limit: 20
+                });
+                
+                if (result.success && result.data) {
+                    setVideos(result.data.docs || result.data); // Handle pagination or direct array
+                } else {
+                    throw new Error(result.error || 'Failed to fetch videos');
                 }
-            ]);
-            setLoading(false);
-        }, 1000);
+            } catch (err) {
+                console.error('Error fetching videos:', err);
+                setError(err.message || 'Failed to load videos');
+                setVideos([]); // Set empty array on error
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchVideos();
     }, []);
 
+    // Refresh videos function (optional - for future use)
+    const refreshVideos = () => {
+        setVideos([]);
+        setLoading(true);
+        fetchVideos();
+    };
+
     return (
-        <div className="pt-16">
+        <div className="min-h-screen bg-background pt-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 className="text-2xl font-bold mb-6 doto-font-heading">Trending Videos</h2>
+                
+                {/* Header */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold doto-font-heading mb-2">
+                        Latest on Pixels
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Discover amazing content from our community
+                    </p>
+                </div>
+
+                {/* Error State */}
+                {error && !loading && (
+                    <div className="mb-6">
+                        <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                                {error}
+                                <button 
+                                    onClick={refreshVideos}
+                                    className="ml-2 underline hover:no-underline"
+                                >
+                                    Try again
+                                </button>
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+                )}
+
+                {/* Video Grid */}
                 <VideoGrid videos={videos} loading={loading} />
+
+                {/* Empty State */}
+                {!loading && !error && videos.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="text-muted-foreground">
+                            <p className="text-lg mb-2">No videos found</p>
+                            <p className="text-sm">Be the first to upload a video!</p>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
