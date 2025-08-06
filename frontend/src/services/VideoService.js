@@ -204,9 +204,6 @@ class VideoService {
         });
     }
 
-    // src/services/VideoService.js
-    // Add this method to your existing VideoService class:
-
     // Get video by ID for watch page
     async getVideoById(videoId) {
         if (!videoId) {

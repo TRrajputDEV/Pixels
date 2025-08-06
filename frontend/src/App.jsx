@@ -7,6 +7,7 @@ import Dashboard from './components/dashboard/Dashboard';
 import LoginForm from './components/auth/LoginForm';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import VideoUpload from "@/components/upload/VideoUpload"
+import WatchVideo from "@/components/watch/WatchVideo"
 function App() {
     return (
         <AuthProvider>
@@ -33,6 +34,7 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
+                            <Route path="/watch/:videoId" element={<WatchVideo />} />
                         </Routes>
                     </main>
                 </div>
