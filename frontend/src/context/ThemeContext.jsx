@@ -4,19 +4,22 @@ import { createContext, useState, useEffect, useContext } from "react";
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-    const [theme, setTheme] = useState("light");
-
-    useEffect(() => {
-        // Check localStorage first, then system preference as fallback
-        const storedTheme = localStorage.getItem("theme");
-        if (storedTheme) {
-            setTheme(storedTheme);
-        } else {
+    // Use lazy initialization to read from localStorage synchronously
+    const [theme, setTheme] = useState(() => {
+        // Check if we're in browser environment
+        if (typeof window !== 'undefined') {
+            const storedTheme = localStorage.getItem("theme");
+            if (storedTheme) {
+                return storedTheme;
+            }
+            // Fallback to system preference
             const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            setTheme(prefersDark ? "dark" : "light");
+            return prefersDark ? "dark" : "light";
         }
-    }, []);
+        return "light"; // SSR fallback
+    });
 
+    // Apply theme to DOM and save to localStorage whenever theme changes
     useEffect(() => {
         const root = document.documentElement;
         root.classList.remove("light", "dark");
