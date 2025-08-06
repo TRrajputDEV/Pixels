@@ -88,6 +88,15 @@ const getAllVideos = asyncHandler(async (req, res) => {
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
+
+     // Debug logs
+    console.log('=== UPLOAD DEBUG ===');
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
+    console.log('Has videoFile:', !!req.files?.videoFile?.[0]);
+    console.log('Has thumbnail:', !!req.files?.thumbnail?.[0]);
+    console.log('==================');
+
     const { title, description } = req.body
 
     // Validate required fields

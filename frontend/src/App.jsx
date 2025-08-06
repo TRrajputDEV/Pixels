@@ -6,7 +6,7 @@ import HomePage from './components/home/HomePage';
 import Dashboard from './components/dashboard/Dashboard';
 import LoginForm from './components/auth/LoginForm';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-
+import VideoUpload from "@/components/upload/VideoUpload"
 function App() {
     return (
         <AuthProvider>
@@ -17,13 +17,21 @@ function App() {
                         <Routes>
                             <Route path="/" element={<HomePage />} />
                             <Route path="/login" element={<LoginForm />} />
-                            <Route 
-                                path="/dashboard" 
+                            <Route
+                                path="/dashboard"
                                 element={
                                     <ProtectedRoute>
                                         <Dashboard />
                                     </ProtectedRoute>
-                                } 
+                                }
+                            />
+                            <Route
+                                path="/upload"
+                                element={
+                                    <ProtectedRoute>
+                                        <VideoUpload />
+                                    </ProtectedRoute>
+                                }
                             />
                         </Routes>
                     </main>
