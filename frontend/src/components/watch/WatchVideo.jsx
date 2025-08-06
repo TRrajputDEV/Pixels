@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import videoService from "@/services/VideoService"
+import CommentSection from "@/components/comments/CommentSection"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -440,6 +441,12 @@ const WatchVideo = () => {
                                 </div>
                             </div>
                         </div>
+
+                        <Separator className="my-6" />
+                        {/* Comments Section */}
+                        <CommentSection videoId={videoId} />
+
+                        
                     </div>
 
                     {/* Sidebar - Related Videos */}
