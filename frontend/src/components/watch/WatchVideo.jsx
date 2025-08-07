@@ -43,7 +43,7 @@ const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) =>
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [showControls, setShowControls] = useState(true)
     const [isLoading, setIsLoading] = useState(true)
-    
+
     const videoRef = useState(null)
     const playerRef = useState(null)
     const controlsTimeoutRef = useState(null)
@@ -171,7 +171,7 @@ const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) =>
     const progressPercentage = duration ? (currentTime / duration) * 100 : 0
 
     return (
-        <div 
+        <div
             ref={playerRef}
             className="relative w-full bg-black rounded-lg overflow-hidden group"
             style={{ aspectRatio: '16/9' }}
@@ -199,7 +199,7 @@ const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) =>
             )}
 
             {/* Click Overlay for Play/Pause */}
-            <div 
+            <div
                 className="absolute inset-0 flex items-center justify-center cursor-pointer"
                 onClick={togglePlay}
             >
@@ -213,11 +213,11 @@ const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) =>
             {/* Controls */}
             <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
                 {/* Progress Bar */}
-                <div 
+                <div
                     className="w-full h-2 bg-white/30 rounded-full mb-4 cursor-pointer"
                     onClick={handleSeek}
                 >
-                    <div 
+                    <div
                         className="h-full bg-primary rounded-full transition-all duration-150"
                         style={{ width: `${progressPercentage}%` }}
                     />
@@ -262,8 +262,8 @@ const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) =>
                                 onClick={toggleMute}
                                 className="text-white hover:bg-white/20"
                             >
-                                {isMuted || volume === 0 ? 
-                                    <VolumeX className="h-5 w-5" /> : 
+                                {isMuted || volume === 0 ?
+                                    <VolumeX className="h-5 w-5" /> :
                                     <Volume2 className="h-5 w-5" />
                                 }
                             </Button>
@@ -367,10 +367,45 @@ const WatchVideo = () => {
         // console.log('Video duration:', duration)
     }
 
+    const handleShare = async () => {
+        try {
+            if (navigator.share) {
+                // Use native Web Share API (modern browsers/mobile devices)
+                await navigator.share({
+                    title: video.title,
+                    text: `Check out this amazing video: ${video.title}`,
+                    url: window.location.href,
+                });
+
+                toast({
+                    title: "Thanks for sharing! 🚀",
+                    description: "Video shared successfully",
+                });
+            } else {
+                // Fallback: Copy to clipboard (desktop browsers)
+                await navigator.clipboard.writeText(window.location.href);
+
+                toast({
+                    title: "Link copied! 📋",
+                    description: "Video URL copied to clipboard",
+                });
+            }
+        } catch (error) {
+            if (error.name !== 'AbortError') { // User cancelled share dialog
+                toast({
+                    title: "Share failed",
+                    description: "Unable to share video. Please copy the URL manually.",
+                    variant: "destructive",
+                });
+                console.error('Share error:', error);
+            }
+        }
+    };
+
     const formatTimeAgo = (date) => {
         const now = new Date()
         const diffInHours = Math.floor((now - new Date(date)) / (1000 * 60 * 60))
-        
+
         if (diffInHours < 24) {
             return `${diffInHours}h ago`
         } else {
@@ -454,14 +489,18 @@ const WatchVideo = () => {
                                             {formatTimeAgo(video.createdAt)}
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex items-center gap-2">
                                         <VideoLikeButton
                                             videoId={video._id}
                                             initialLikeCount={0}
                                             initialIsLiked={false}
                                         />
-                                        <Button variant="outline" size="sm">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleShare}
+                                        >
                                             <Share2 className="h-4 w-4 mr-2" />
                                             Share
                                         </Button>
@@ -530,10 +569,10 @@ const WatchVideo = () => {
                         <h2 className="text-lg font-semibold doto-font-heading">
                             More Videos ({relatedVideos.length})
                         </h2>
-                        
+
                         <div className="space-y-3">
                             {relatedVideos.map((relatedVideo) => (
-                                <Card 
+                                <Card
                                     key={relatedVideo._id}
                                     className="cursor-pointer hover:shadow-md transition-shadow"
                                     onClick={() => navigate(`/watch/${relatedVideo._id}`)}
@@ -553,7 +592,7 @@ const WatchVideo = () => {
                                                     <Play className="h-6 w-6 text-white" />
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="font-medium text-sm line-clamp-2 doto-font hover:text-primary transition-colors">
                                                     {relatedVideo.title}
