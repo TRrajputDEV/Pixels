@@ -1,194 +1,409 @@
-// src/components/watch/WatchVideo.jsx
-import { useState, useEffect, useRef } from "react"
+// src/components/video/WatchVideo.jsx - Complete Updated Version
+import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
-import videoService from "@/services/VideoService"
-import CommentSection from "@/components/comments/CommentSection"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import VideoLikeButton from "@/components/ui/VideoLikeButton"
-
 import {
     ThumbsUp,
     ThumbsDown,
-    Share,
-    Download,
+    Share2,
     Flag,
-    Eye,
-    Calendar,
-    Clock,
+    MoreHorizontal,
     Play,
     Pause,
     Volume2,
     VolumeX,
     Maximize,
-    Settings,
+    Minimize,
+    SkipBack,
+    SkipForward,
+    Loader2,
     AlertCircle,
-    Loader2
+    Eye,
+    Calendar,
+    Clock
 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import videoService from "@/services/VideoService"
+import VideoLikeButton from "@/components/ui/VideoLikeButton"
+import CommentSection from "@/components/comments/CommentSection"
+
+// Enhanced Video Player Component
+const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) => {
+    const [isPlaying, setIsPlaying] = useState(false)
+    const [volume, setVolume] = useState(1)
+    const [isMuted, setIsMuted] = useState(false)
+    const [currentTime, setCurrentTime] = useState(0)
+    const [duration, setDuration] = useState(0)
+    const [isFullscreen, setIsFullscreen] = useState(false)
+    const [showControls, setShowControls] = useState(true)
+    const [isLoading, setIsLoading] = useState(true)
+    
+    const videoRef = useState(null)
+    const playerRef = useState(null)
+    const controlsTimeoutRef = useState(null)
+
+    useEffect(() => {
+        const video = videoRef.current
+        if (!video) return
+
+        const handleLoadedData = () => {
+            setIsLoading(false)
+            setDuration(video.duration)
+            if (onLoadedMetadata) onLoadedMetadata(video.duration)
+        }
+
+        const handleTimeUpdate = () => {
+            setCurrentTime(video.currentTime)
+            if (onTimeUpdate) onTimeUpdate(video.currentTime)
+        }
+
+        const handleEnded = () => {
+            setIsPlaying(false)
+        }
+
+        video.addEventListener('loadeddata', handleLoadedData)
+        video.addEventListener('timeupdate', handleTimeUpdate)
+        video.addEventListener('ended', handleEnded)
+
+        return () => {
+            video.removeEventListener('loadeddata', handleLoadedData)
+            video.removeEventListener('timeupdate', handleTimeUpdate)
+            video.removeEventListener('ended', handleEnded)
+        }
+    }, [videoUrl, onTimeUpdate, onLoadedMetadata])
+
+    // Auto-hide controls
+    useEffect(() => {
+        if (showControls && isPlaying) {
+            clearTimeout(controlsTimeoutRef.current)
+            controlsTimeoutRef.current = setTimeout(() => {
+                setShowControls(false)
+            }, 3000)
+        }
+        return () => clearTimeout(controlsTimeoutRef.current)
+    }, [showControls, isPlaying])
+
+    const togglePlay = () => {
+        const video = videoRef.current
+        if (!video) return
+
+        if (isPlaying) {
+            video.pause()
+        } else {
+            video.play()
+        }
+        setIsPlaying(!isPlaying)
+    }
+
+    const toggleMute = () => {
+        const video = videoRef.current
+        if (!video) return
+
+        video.muted = !isMuted
+        setIsMuted(!isMuted)
+    }
+
+    const handleVolumeChange = (e) => {
+        const video = videoRef.current
+        if (!video) return
+
+        const newVolume = parseFloat(e.target.value)
+        video.volume = newVolume
+        setVolume(newVolume)
+        setIsMuted(newVolume === 0)
+    }
+
+    const handleSeek = (e) => {
+        const video = videoRef.current
+        if (!video) return
+
+        const rect = e.currentTarget.getBoundingClientRect()
+        const percent = (e.clientX - rect.left) / rect.width
+        const newTime = percent * duration
+        video.currentTime = newTime
+        setCurrentTime(newTime)
+    }
+
+    const skip = (seconds) => {
+        const video = videoRef.current
+        if (!video) return
+
+        video.currentTime = Math.max(0, Math.min(duration, currentTime + seconds))
+    }
+
+    const toggleFullscreen = () => {
+        const player = playerRef.current
+        if (!player) return
+
+        if (!isFullscreen) {
+            if (player.requestFullscreen) {
+                player.requestFullscreen()
+            } else if (player.webkitRequestFullscreen) {
+                player.webkitRequestFullscreen()
+            } else if (player.msRequestFullscreen) {
+                player.msRequestFullscreen()
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen()
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen()
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen()
+            }
+        }
+        setIsFullscreen(!isFullscreen)
+    }
+
+    const formatTime = (time) => {
+        if (isNaN(time)) return "0:00"
+        const minutes = Math.floor(time / 60)
+        const seconds = Math.floor(time % 60)
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`
+    }
+
+    const progressPercentage = duration ? (currentTime / duration) * 100 : 0
+
+    return (
+        <div 
+            ref={playerRef}
+            className="relative w-full bg-black rounded-lg overflow-hidden group"
+            style={{ aspectRatio: '16/9' }}
+            onMouseMove={() => setShowControls(true)}
+            onMouseLeave={() => isPlaying && setShowControls(false)}
+        >
+            {/* Video Element */}
+            <video
+                ref={videoRef}
+                className="w-full h-full"
+                src={videoUrl}
+                poster={thumbnail}
+                preload="metadata"
+                controlsList="nodownload noremoteplayback"
+                disablePictureInPicture
+                onContextMenu={(e) => e.preventDefault()} // Disable right-click
+                style={{ pointerEvents: 'none' }} // Prevent direct interaction
+            />
+
+            {/* Loading Overlay */}
+            {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <Loader2 className="h-8 w-8 animate-spin text-white" />
+                </div>
+            )}
+
+            {/* Click Overlay for Play/Pause */}
+            <div 
+                className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                onClick={togglePlay}
+            >
+                {!isPlaying && !isLoading && (
+                    <div className="bg-black/50 rounded-full p-4 transition-all duration-200 hover:bg-black/70">
+                        <Play className="h-12 w-12 text-white fill-current" />
+                    </div>
+                )}
+            </div>
+
+            {/* Controls */}
+            <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+                {/* Progress Bar */}
+                <div 
+                    className="w-full h-2 bg-white/30 rounded-full mb-4 cursor-pointer"
+                    onClick={handleSeek}
+                >
+                    <div 
+                        className="h-full bg-primary rounded-full transition-all duration-150"
+                        style={{ width: `${progressPercentage}%` }}
+                    />
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        {/* Play/Pause */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={togglePlay}
+                            className="text-white hover:bg-white/20"
+                        >
+                            {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                        </Button>
+
+                        {/* Skip buttons */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => skip(-10)}
+                            className="text-white hover:bg-white/20"
+                        >
+                            <SkipBack className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => skip(10)}
+                            className="text-white hover:bg-white/20"
+                        >
+                            <SkipForward className="h-4 w-4" />
+                        </Button>
+
+                        {/* Volume */}
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={toggleMute}
+                                className="text-white hover:bg-white/20"
+                            >
+                                {isMuted || volume === 0 ? 
+                                    <VolumeX className="h-5 w-5" /> : 
+                                    <Volume2 className="h-5 w-5" />
+                                }
+                            </Button>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.1"
+                                value={isMuted ? 0 : volume}
+                                onChange={handleVolumeChange}
+                                className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer slider"
+                            />
+                        </div>
+
+                        {/* Time Display */}
+                        <span className="text-white text-sm font-mono">
+                            {formatTime(currentTime)} / {formatTime(duration)}
+                        </span>
+                    </div>
+
+                    {/* Fullscreen */}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleFullscreen}
+                        className="text-white hover:bg-white/20"
+                    >
+                        {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+                    </Button>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 const WatchVideo = () => {
     const { videoId } = useParams()
-    const { user } = useAuth()
+    const { user, isAuthenticated } = useAuth()
     const navigate = useNavigate()
-    const videoRef = useRef(null)
+    const { toast } = useToast()
 
-    // Video data state
+    // State
     const [video, setVideo] = useState(null)
+    const [relatedVideos, setRelatedVideos] = useState([]) // This will show ALL videos
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-
-    // Video player state
-    const [isPlaying, setIsPlaying] = useState(false)
-    const [currentTime, setCurrentTime] = useState(0)
-    const [duration, setDuration] = useState(0)
-    const [volume, setVolume] = useState(1)
-    const [isMuted, setIsMuted] = useState(false)
-    const [isFullscreen, setIsFullscreen] = useState(false)
-    const [showControls, setShowControls] = useState(true)
-
-    // Interaction state
-    const [isLiked, setIsLiked] = useState(false)
-    const [isDisliked, setIsDisliked] = useState(false)
     const [showDescription, setShowDescription] = useState(false)
 
-    // Fetch video data
+    // Fetch video and related videos
     useEffect(() => {
-        const fetchVideo = async () => {
-            if (!videoId) {
-                setError("Video ID is required")
-                setLoading(false)
-                return
-            }
-
+        const fetchVideoData = async () => {
             try {
                 setLoading(true)
-                const result = await videoService.getVideoById(videoId)
+                setError(null)
 
-                if (result.success) {
-                    setVideo(result.data)
+                // Fetch current video
+                const videoResult = await videoService.getVideoById(videoId)
+                if (videoResult.success) {
+                    setVideo(videoResult.data)
                 } else {
-                    setError(result.error || "Failed to load video")
+                    setError(videoResult.error || "Video not found")
+                    return
                 }
+
+                // Fetch ALL videos as related videos (excluding current video)
+                const relatedResult = await videoService.getAllVideos({
+                    page: 1,
+                    limit: 20, // Show 20 related videos
+                    sortBy: 'createdAt',
+                    sortType: 'desc'
+                })
+
+                if (relatedResult.success) {
+                    // Filter out current video from related videos
+                    const allVideos = relatedResult.data.docs || relatedResult.data || []
+                    const filteredVideos = allVideos.filter(v => v._id !== videoId)
+                    setRelatedVideos(filteredVideos)
+                }
+
             } catch (err) {
                 setError("An error occurred while loading the video")
-                console.error("Video fetch error:", err)
+                console.error("Watch video error:", err)
             } finally {
                 setLoading(false)
             }
         }
 
-        fetchVideo()
+        if (videoId) {
+            fetchVideoData()
+        }
     }, [videoId])
 
-    // Video player event handlers
-    const handlePlayPause = () => {
-        if (videoRef.current) {
-            if (isPlaying) {
-                videoRef.current.pause()
-            } else {
-                videoRef.current.play()
-            }
-            setIsPlaying(!isPlaying)
-        }
+    // Handle video time updates (for watch history, analytics, etc.)
+    const handleTimeUpdate = (currentTime) => {
+        // You can track watch progress here for analytics
+        // console.log('Current time:', currentTime)
     }
 
-    const handleTimeUpdate = () => {
-        if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime)
-        }
+    const handleVideoMetadata = (duration) => {
+        // You can update video duration or analytics here
+        // console.log('Video duration:', duration)
     }
 
-    const handleLoadedMetadata = () => {
-        if (videoRef.current) {
-            setDuration(videoRef.current.duration)
-        }
-    }
-
-    const handleSeek = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const clickX = e.clientX - rect.left
-        const newTime = (clickX / rect.width) * duration
-
-        if (videoRef.current) {
-            videoRef.current.currentTime = newTime
-            setCurrentTime(newTime)
-        }
-    }
-
-    const handleVolumeChange = (newVolume) => {
-        setVolume(newVolume)
-        setIsMuted(newVolume === 0)
-        if (videoRef.current) {
-            videoRef.current.volume = newVolume
-        }
-    }
-
-    const toggleMute = () => {
-        const newMuted = !isMuted
-        setIsMuted(newMuted)
-        if (videoRef.current) {
-            videoRef.current.muted = newMuted
-        }
-    }
-
-    const toggleFullscreen = () => {
-        if (!document.fullscreenElement) {
-            videoRef.current?.requestFullscreen()
-            setIsFullscreen(true)
+    const formatTimeAgo = (date) => {
+        const now = new Date()
+        const diffInHours = Math.floor((now - new Date(date)) / (1000 * 60 * 60))
+        
+        if (diffInHours < 24) {
+            return `${diffInHours}h ago`
         } else {
-            document.exitFullscreen()
-            setIsFullscreen(false)
+            const diffInDays = Math.floor(diffInHours / 24)
+            if (diffInDays < 30) {
+                return `${diffInDays}d ago`
+            } else if (diffInDays < 365) {
+                return `${Math.floor(diffInDays / 30)}mo ago`
+            } else {
+                return `${Math.floor(diffInDays / 365)}y ago`
+            }
         }
     }
 
-    const formatTime = (seconds) => {
+    const formatNumber = (num) => {
+        if (num >= 1000000) {
+            return `${(num / 1000000).toFixed(1)}M`
+        } else if (num >= 1000) {
+            return `${(num / 1000).toFixed(1)}K`
+        }
+        return num?.toString() || '0'
+    }
+
+    const formatDuration = (seconds) => {
+        if (!seconds) return '0:00'
         const mins = Math.floor(seconds / 60)
         const secs = Math.floor(seconds % 60)
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    const formatViews = (views) => {
-        if (views >= 1000000) {
-            return `${(views / 1000000).toFixed(1)}M`
-        } else if (views >= 1000) {
-            return `${(views / 1000).toFixed(1)}K`
-        }
-        return views?.toString() || '0'
-    }
-
-    const formatDate = (date) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        })
-    }
-
-    // Handle like/dislike (placeholder for future implementation)
-    const handleLike = () => {
-        setIsLiked(!isLiked)
-        if (isDisliked) setIsDisliked(false)
-    }
-
-    const handleDislike = () => {
-        setIsDisliked(!isDisliked)
-        if (isLiked) setIsLiked(false)
-    }
-
-    const handleShare = () => {
-        navigator.clipboard.writeText(window.location.href)
-        // Add toast notification here
-    }
-
     if (loading) {
         return (
-            <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+            <div className="min-h-screen bg-background pt-16 flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                     <p className="text-muted-foreground">Loading video...</p>
@@ -199,12 +414,10 @@ const WatchVideo = () => {
 
     if (error || !video) {
         return (
-            <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+            <div className="min-h-screen bg-background pt-16 flex items-center justify-center">
                 <Alert variant="destructive" className="max-w-md">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                        {error || "Video not found"}
-                    </AlertDescription>
+                    <AlertDescription>{error || "Video not found"}</AlertDescription>
                 </Alert>
             </div>
         )
@@ -213,112 +426,16 @@ const WatchVideo = () => {
     return (
         <div className="min-h-screen bg-background pt-16">
             <div className="container mx-auto px-4 py-6 max-w-7xl">
-                <div className="grid lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Video Section */}
-                    <div className="lg:col-span-2 space-y-4">
+                    <div className="lg:col-span-2 space-y-6">
                         {/* Video Player */}
-                        <div className="relative aspect-video bg-black rounded-lg overflow-hidden group">
-                            <video
-                                ref={videoRef}
-                                src={video.videoFile}
-                                poster={video.thumbnail}
-                                className="w-full h-full object-contain"
-                                onTimeUpdate={handleTimeUpdate}
-                                onLoadedMetadata={handleLoadedMetadata}
-                                onPlay={() => setIsPlaying(true)}
-                                onPause={() => setIsPlaying(false)}
-                                onMouseMove={() => setShowControls(true)}
-                                onMouseLeave={() => setShowControls(false)}
-                            />
-
-                            {/* Video Controls */}
-                            <div className={`absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity ${showControls ? 'opacity-100' : 'opacity-0'
-                                }`}>
-                                {/* Play/Pause Button */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="w-16 h-16 bg-black/50 hover:bg-black/70 text-white"
-                                        onClick={handlePlayPause}
-                                    >
-                                        {isPlaying ? (
-                                            <Pause className="h-8 w-8" />
-                                        ) : (
-                                            <Play className="h-8 w-8" />
-                                        )}
-                                    </Button>
-                                </div>
-
-                                {/* Bottom Controls */}
-                                <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
-                                    {/* Progress Bar */}
-                                    <div
-                                        className="w-full h-1 bg-white/30 rounded-full cursor-pointer"
-                                        onClick={handleSeek}
-                                    >
-                                        <div
-                                            className="h-full bg-primary rounded-full"
-                                            style={{ width: `${(currentTime / duration) * 100}%` }}
-                                        />
-                                    </div>
-
-                                    {/* Control Buttons */}
-                                    <div className="flex items-center justify-between text-white">
-                                        <div className="flex items-center gap-3">
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="text-white hover:bg-white/20"
-                                                onClick={handlePlayPause}
-                                            >
-                                                {isPlaying ? (
-                                                    <Pause className="h-5 w-5" />
-                                                ) : (
-                                                    <Play className="h-5 w-5" />
-                                                )}
-                                            </Button>
-
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="text-white hover:bg-white/20"
-                                                onClick={toggleMute}
-                                            >
-                                                {isMuted ? (
-                                                    <VolumeX className="h-5 w-5" />
-                                                ) : (
-                                                    <Volume2 className="h-5 w-5" />
-                                                )}
-                                            </Button>
-
-                                            <div className="text-sm">
-                                                {formatTime(currentTime)} / {formatTime(duration)}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="text-white hover:bg-white/20"
-                                            >
-                                                <Settings className="h-5 w-5" />
-                                            </Button>
-
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="text-white hover:bg-white/20"
-                                                onClick={toggleFullscreen}
-                                            >
-                                                <Maximize className="h-5 w-5" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <VideoPlayer
+                            videoUrl={video.videoFile}
+                            thumbnail={video.thumbnail}
+                            onTimeUpdate={handleTimeUpdate}
+                            onLoadedMetadata={handleVideoMetadata}
+                        />
 
                         {/* Video Info */}
                         <div className="space-y-4">
@@ -326,147 +443,142 @@ const WatchVideo = () => {
                                 <h1 className="text-2xl font-bold doto-font-heading mb-2">
                                     {video.title}
                                 </h1>
-
-                                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1">
-                                        <Eye className="h-4 w-4" />
-                                        {formatViews(video.view)} views
+                                <div className="flex items-center justify-between flex-wrap gap-4">
+                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-1">
+                                            <Eye className="h-4 w-4" />
+                                            {formatNumber(video.view)} views
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Calendar className="h-4 w-4" />
+                                            {formatTimeAgo(video.createdAt)}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                        <Calendar className="h-4 w-4" />
-                                        {formatDate(video.createdAt)}
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <VideoLikeButton
+                                            videoId={video._id}
+                                            initialLikeCount={0}
+                                            initialIsLiked={false}
+                                        />
+                                        <Button variant="outline" size="sm">
+                                            <Share2 className="h-4 w-4 mr-2" />
+                                            Share
+                                        </Button>
+                                        <Button variant="outline" size="sm">
+                                            <Flag className="h-4 w-4 mr-2" />
+                                            Report
+                                        </Button>
                                     </div>
-                                    <Badge variant="secondary">
-                                        {video.isPublished ? 'Published' : 'Unlisted'}
-                                    </Badge>
                                 </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <VideoLikeButton
-                                    videoId={video._id}
-                                    initialLikeCount={0} // You can get this from backend later
-                                    initialIsLiked={false} // You can get this from backend later
-                                />
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleShare}
-                                    className="doto-font-button"
-                                >
-                                    <Share className="h-4 w-4 mr-2" />
-                                    Share
-                                </Button>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="doto-font-button"
-                                >
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Download
-                                </Button>
-
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="doto-font-button"
-                                >
-                                    <Flag className="h-4 w-4 mr-2" />
-                                    Report
-                                </Button>
                             </div>
 
                             <Separator />
 
                             {/* Channel Info */}
-                            <div className="flex items-start gap-4">
-                                <Avatar className="h-12 w-12">
-                                    <AvatarImage
-                                        src={video.owner?.avatar}
-                                        alt={video.owner?.fullname}
-                                    />
-                                    <AvatarFallback>
-                                        {video.owner?.fullname?.[0]?.toUpperCase() || 'U'}
-                                    </AvatarFallback>
-                                </Avatar>
-
-                                <div className="flex-1 space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="font-semibold doto-font">
-                                                {video.owner?.fullname || video.owner?.username}
-                                            </h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                @{video.owner?.username}
-                                            </p>
-                                        </div>
-
-                                        <Button className="doto-font-button">
-                                            Subscribe
-                                        </Button>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <p className={`text-sm ${!showDescription ? 'line-clamp-2' : ''}`}>
-                                            {video.description}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-12 w-12">
+                                        <AvatarImage
+                                            src={video.owner?.avatar}
+                                            alt={video.owner?.fullname}
+                                        />
+                                        <AvatarFallback>
+                                            {video.owner?.fullname?.[0]?.toUpperCase() || "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <h3 className="font-semibold doto-font">
+                                            {video.owner?.fullname || video.owner?.username}
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Content Creator
                                         </p>
-
-                                        {video.description?.length > 150 && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => setShowDescription(!showDescription)}
-                                                className="text-primary p-0 h-auto font-normal"
-                                            >
-                                                {showDescription ? 'Show less' : 'Show more'}
-                                            </Button>
-                                        )}
                                     </div>
                                 </div>
+                                <Button variant="default" className="doto-font-button">
+                                    Subscribe
+                                </Button>
+                            </div>
+
+                            {/* Description */}
+                            <div className="bg-muted/50 rounded-lg p-4">
+                                <div className={`${showDescription ? '' : 'line-clamp-3'}`}>
+                                    <p className="text-sm doto-font whitespace-pre-wrap">
+                                        {video.description}
+                                    </p>
+                                </div>
+                                {video.description && video.description.length > 200 && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setShowDescription(!showDescription)}
+                                        className="mt-2 p-0 h-auto text-primary"
+                                    >
+                                        {showDescription ? "Show less" : "Show more"}
+                                    </Button>
+                                )}
                             </div>
                         </div>
 
-                        <Separator className="my-6" />
                         {/* Comments Section */}
-                        <CommentSection videoId={videoId} />
-
-
+                        <CommentSection videoId={video._id} />
                     </div>
 
-                    {/* Sidebar - Related Videos */}
+                    {/* Related Videos Sidebar */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold doto-font-heading">
-                            Related Videos
-                        </h3>
-
-                        {/* Placeholder for related videos */}
-                        <div className="space-y-4">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <Card key={i} className="cursor-pointer hover:bg-muted/50 transition-colors">
+                        <h2 className="text-lg font-semibold doto-font-heading">
+                            More Videos ({relatedVideos.length})
+                        </h2>
+                        
+                        <div className="space-y-3">
+                            {relatedVideos.map((relatedVideo) => (
+                                <Card 
+                                    key={relatedVideo._id}
+                                    className="cursor-pointer hover:shadow-md transition-shadow"
+                                    onClick={() => navigate(`/watch/${relatedVideo._id}`)}
+                                >
                                     <CardContent className="p-3">
                                         <div className="flex gap-3">
-                                            <div className="w-32 h-20 bg-muted rounded flex items-center justify-center">
-                                                <Play className="h-6 w-6 text-muted-foreground" />
+                                            <div className="relative w-32 h-20 rounded overflow-hidden bg-muted flex-shrink-0">
+                                                <img
+                                                    src={relatedVideo.thumbnail}
+                                                    alt={relatedVideo.title}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 py-0.5 rounded">
+                                                    {formatDuration(relatedVideo.duration)}
+                                                </div>
+                                                <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <Play className="h-6 w-6 text-white" />
+                                                </div>
                                             </div>
-                                            <div className="flex-1 space-y-1">
-                                                <h4 className="text-sm font-medium line-clamp-2">
-                                                    Related Video Title {i}
-                                                </h4>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Channel Name
+                                            
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-medium text-sm line-clamp-2 doto-font hover:text-primary transition-colors">
+                                                    {relatedVideo.title}
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {relatedVideo.owner?.fullname || relatedVideo.owner?.username}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    1.2M views • 2 days ago
-                                                </p>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                                    <span>{formatNumber(relatedVideo.view)} views</span>
+                                                    <span>•</span>
+                                                    <span>{formatTimeAgo(relatedVideo.createdAt)}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
                             ))}
                         </div>
+
+                        {relatedVideos.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground">
+                                <Play className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                                <p className="text-sm">No other videos available</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
