@@ -117,26 +117,40 @@ class ApiService {
     }
 
     // Update User Avatar
+    // src/services/ApiService.js
+    // Update these methods to use the correct field names:
+
+    // Update User Avatar - use 'avatar' field name
+    // src/services/ApiService.js
+    // Update these methods with the EXACT endpoint paths:
+
     async updateAvatar(avatarFile) {
         const formData = new FormData();
-        formData.append('avatar', avatarFile);
+        formData.append('avatar', avatarFile); // Field name must match multer config
 
-        return this.request('/users/avatar', {
+        console.log('Uploading avatar:', avatarFile.name); // Debug log
+
+        return this.request('/users/avatar', { // Make sure this matches your route
             method: 'PATCH',
             body: formData
+            // Don't set Content-Type header - let browser set it for FormData
         });
     }
 
-    // Update User Cover Image
     async updateCoverImage(coverImageFile) {
         const formData = new FormData();
-        formData.append('coverImage', coverImageFile);
+        formData.append('coverImage', coverImageFile); // Field name must match multer config
 
-        return this.request('/users/cover-image', {
+        console.log('Uploading cover image:', coverImageFile.name); // Debug log
+
+        return this.request('/users/cover-image', { // Make sure this matches your route
             method: 'PATCH',
             body: formData
+            // Don't set Content-Type header - let browser set it for FormData
         });
     }
+
+
 
     // Get User Channel Profile
     async getUserChannelProfile(username) {
@@ -167,6 +181,15 @@ class ApiService {
             coverImage: coverImageFile
         };
     }
+
+    // Add this method to your ApiService class
+    async changePassword(passwordData) {
+        return this.request('/users/change-password', {
+            method: 'POST',
+            body: JSON.stringify(passwordData)
+        });
+    }
+
 }
 
 const apiService = new ApiService();

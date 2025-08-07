@@ -9,6 +9,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import VideoUpload from "@/components/upload/VideoUpload"
 import WatchVideo from "@/components/watch/WatchVideo"
 import SearchResults from "@/components/search/SearchResults"
+import UserProfile from "@/components/profile/UserProfile"
 function App() {
     return (
         <AuthProvider>
@@ -37,6 +38,14 @@ function App() {
                             />
                             <Route path="/watch/:videoId" element={<WatchVideo />} />
                             <Route path="/search" element={<SearchResults />} />
+                            <Route
+                                path="/profile"
+                                element={
+                                    <ProtectedRoute>
+                                        <UserProfile />
+                                    </ProtectedRoute>
+                                }
+                            />
                         </Routes>
                     </main>
                 </div>
