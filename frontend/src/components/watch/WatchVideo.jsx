@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast"
 import videoService from "@/services/VideoService"
 import VideoLikeButton from "@/components/ui/VideoLikeButton"
 import CommentSection from "@/components/comments/CommentSection"
+import SubscribeButton from "@/components/ui/SubscribeButton"
 
 // Enhanced Video Player Component
 const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) => {
@@ -535,9 +536,12 @@ const WatchVideo = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <Button variant="default" className="doto-font-button">
-                                    Subscribe
-                                </Button>
+                                <SubscribeButton
+                                    channelId={video.owner._id}
+                                    channelName={video.owner?.fullname || video.owner?.username}
+                                    initialSubscriberCount={0} // You can get this from backend if available
+                                    className="doto-font-button"
+                                />
                             </div>
 
                             {/* Description */}
