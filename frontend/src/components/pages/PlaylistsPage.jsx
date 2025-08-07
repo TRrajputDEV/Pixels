@@ -8,7 +8,7 @@ const PlaylistsPage = () => {
             feature="Playlists"
             description="Create and organize your favorite videos into custom playlists. Share your collections with others!"
             icon={PlaySquare}
-            estimatedDate="Coming in April 2024"
+            estimatedDate="Coming in Dec 2025 version V2"
             relatedFeatures={[
                 { name: "My Videos", icon: Video, path: "/my-videos" },
                 { name: "Watch Later", icon: Clock, path: "/watch-later" },

@@ -8,7 +8,7 @@ const WatchLaterPage = () => {
             feature="Watch Later"
             description="Save videos to watch when you have time. Build your personal queue and never miss great content!"
             icon={Clock}
-            estimatedDate="Coming in March 2024"
+            estimatedDate="Coming in Dec 2025 version V2"
             relatedFeatures={[
                 { name: "My Videos", icon: Video, path: "/my-videos" },
                 { name: "Liked Videos", icon: ThumbsUp, path: "/liked-videos" },

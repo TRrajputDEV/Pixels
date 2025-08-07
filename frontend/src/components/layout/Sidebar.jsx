@@ -316,6 +316,7 @@ const Sidebar = ({ isOpen, className = "" }) => {
 
                     {/* Settings Section */}
                     <Separator />
+                    
                     <div>
                         <SectionTitle title="More" icon={Settings} />
                         <div className="space-y-1">
@@ -335,10 +336,10 @@ const Sidebar = ({ isOpen, className = "" }) => {
             <div className="p-4 border-t">
                 <div className="text-center">
                     <p className="text-xs text-muted-foreground">
-                        © 2024 Pixels Platform
+                        © 2025 Pixels Platform
                     </p>
                     <p className="text-xs text-muted-foreground">
-                        Made with ❤️ for creators
+                        Made By Team Dev10x
                     </p>
                 </div>
             </div>

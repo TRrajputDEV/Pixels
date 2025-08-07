@@ -8,7 +8,7 @@ const HistoryPage = () => {
             feature="Watch History"
             description="Keep track of all the videos you've watched. Easily find that video you saw last week!"
             icon={History}
-            estimatedDate="Coming in March 2024"
+            estimatedDate="Coming in Dec 2025 version V2"
             relatedFeatures={[
                 { name: "My Videos", icon: Video, path: "/my-videos" },
                 { name: "Watch Later", icon: Clock, path: "/watch-later" },
