@@ -118,7 +118,7 @@ const Dashboard = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <Alert variant="destructive" className="max-w-md">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{error}</AlertDescription>
