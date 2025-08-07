@@ -10,6 +10,7 @@ import VideoUpload from "@/components/upload/VideoUpload"
 import WatchVideo from "@/components/watch/WatchVideo"
 import SearchResults from "@/components/search/SearchResults"
 import UserProfile from "@/components/profile/UserProfile"
+import MyVideos from "@/components/videos/MyVideos"
 function App() {
     return (
         <AuthProvider>
@@ -43,6 +44,14 @@ function App() {
                                 element={
                                     <ProtectedRoute>
                                         <UserProfile />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/my-videos"
+                                element={
+                                    <ProtectedRoute>
+                                        <MyVideos />
                                     </ProtectedRoute>
                                 }
                             />

@@ -89,7 +89,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 const publishAVideo = asyncHandler(async (req, res) => {
 
-     // Debug logs
+    // Debug logs
     console.log('=== UPLOAD DEBUG ===');
     console.log('Body:', req.body);
     console.log('Files:', req.files);
@@ -256,15 +256,18 @@ const updateVideo = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, updatedVideo, "Video updated successfully"))
 })
 
+// src/controllers/video.controller.js - Update or add this function
+
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 
-    if (!isValidObjectId(videoId)) {
+    // Validate video ID
+    if (!mongoose.isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid video ID")
     }
 
+    // Find the video
     const video = await Video.findById(videoId)
-
     if (!video) {
         throw new ApiError(404, "Video not found")
     }
@@ -274,12 +277,23 @@ const deleteVideo = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You don't have permission to delete this video")
     }
 
-    await Video.findByIdAndDelete(videoId)
+    try {
+        // Delete the video from database
+        await Video.findByIdAndDelete(videoId)
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Video deleted successfully"))
+        // Optional: Delete associated likes and comments
+        await Like.deleteMany({ video: videoId })
+        await Comment.deleteMany({ video: videoId })
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, {}, "Video deleted successfully"))
+
+    } catch (error) {
+        throw new ApiError(500, "Error deleting video: " + error.message)
+    }
 })
+
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
