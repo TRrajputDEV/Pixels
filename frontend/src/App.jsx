@@ -12,6 +12,7 @@ import SearchResults from "@/components/search/SearchResults"
 import UserProfile from "@/components/profile/UserProfile"
 import MyVideos from "@/components/videos/MyVideos"
 import EditVideo from "@/components/videos/EditVideo"
+import Analytics from "@/components/analytics/Analytics"
 function App() {
     return (
         <AuthProvider>
@@ -61,6 +62,14 @@ function App() {
                                 element={
                                     <ProtectedRoute>
                                         <EditVideo />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/analytics"
+                                element={
+                                    <ProtectedRoute>
+                                        <Analytics />
                                     </ProtectedRoute>
                                 }
                             />
