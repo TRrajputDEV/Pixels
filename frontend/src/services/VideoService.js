@@ -261,6 +261,47 @@ class VideoService {
         return this.searchVideos(query, { limit: 5 });
     }
 
+    // Add these methods to your existing src/services/VideoService.js
+
+    // Update video details
+    async updateVideo(videoId, videoData) {
+        if (!videoId) {
+            return { error: 'Video ID is required', success: false };
+        }
+
+        return this.request(`/videos/${videoId}`, {
+            method: 'PATCH',
+            body: JSON.stringify(videoData)
+        });
+    }
+
+    // Update video thumbnail
+    async updateVideoThumbnail(videoId, thumbnailFile) {
+        if (!videoId || !thumbnailFile) {
+            return { error: 'Video ID and thumbnail file are required', success: false };
+        }
+
+        const formData = new FormData();
+        formData.append('thumbnail', thumbnailFile);
+
+        return this.request(`/videos/${videoId}`, {
+            method: 'PATCH',
+            body: formData
+        });
+    }
+
+    // Toggle publish status
+    async togglePublishStatus(videoId) {
+        if (!videoId) {
+            return { error: 'Video ID is required', success: false };
+        }
+
+        return this.request(`/videos/toggle/publish/${videoId}`, {
+            method: 'PATCH'
+        });
+    }
+
+
 
 }
 

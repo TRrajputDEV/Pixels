@@ -11,6 +11,7 @@ import WatchVideo from "@/components/watch/WatchVideo"
 import SearchResults from "@/components/search/SearchResults"
 import UserProfile from "@/components/profile/UserProfile"
 import MyVideos from "@/components/videos/MyVideos"
+import EditVideo from "@/components/videos/EditVideo"
 function App() {
     return (
         <AuthProvider>
@@ -52,6 +53,14 @@ function App() {
                                 element={
                                     <ProtectedRoute>
                                         <MyVideos />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/edit-video/:videoId"
+                                element={
+                                    <ProtectedRoute>
+                                        <EditVideo />
                                     </ProtectedRoute>
                                 }
                             />
