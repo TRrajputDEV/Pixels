@@ -38,6 +38,7 @@ import SubscribeButton from "@/components/ui/SubscribeButton"
 import userService from "@/services/UserService"
 import videoService from "@/services/VideoService"
 import subscriptionService from "@/services/SubscriptionService"
+import ReportButton from '@/common/ReportButton'
 
 const ChannelPage = () => {
     const { username } = useParams()
@@ -70,7 +71,7 @@ const ChannelPage = () => {
 
                 // Fetch channel profile data
                 const profileResult = await userService.getUserChannelProfile(username)
-                
+
                 if (profileResult.success) {
                     setChannelData(profileResult.data)
                     setChannelStats({
@@ -101,7 +102,7 @@ const ChannelPage = () => {
     const fetchChannelVideos = async (channelId) => {
         try {
             setVideosLoading(true)
-            
+
             // Get all videos from this channel
             const videosResult = await videoService.getAllVideos({
                 page: 1,
@@ -114,7 +115,7 @@ const ChannelPage = () => {
             if (videosResult.success) {
                 const allVideos = videosResult.data.docs || videosResult.data || []
                 // Filter videos by owner ID to ensure we only get this channel's videos
-                const channelVideos = allVideos.filter(video => 
+                const channelVideos = allVideos.filter(video =>
                     video.owner._id === channelId || video.owner === channelId
                 )
                 setChannelVideos(channelVideos)
@@ -168,7 +169,7 @@ const ChannelPage = () => {
     const formatTimeAgo = (date) => {
         const now = new Date()
         const diffInHours = Math.floor((now - new Date(date)) / (1000 * 60 * 60))
-        
+
         if (diffInHours < 24) {
             return `${diffInHours}h ago`
         } else {
@@ -275,9 +276,9 @@ const ChannelPage = () => {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Calendar className="h-4 w-4" />
-                                    Joined {new Date(channelData.createdAt).toLocaleDateString('en-US', { 
-                                        year: 'numeric', 
-                                        month: 'long' 
+                                    Joined {new Date(channelData.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long'
                                     })}
                                 </div>
                             </div>
@@ -301,7 +302,7 @@ const ChannelPage = () => {
                                 initialSubscriberCount={channelStats?.subscriberCount}
                                 className="w-full md:w-auto doto-font-button"
                             />
-                            
+
                             {/* Secondary Actions */}
                             <div className="flex gap-2">
                                 <Button
@@ -313,14 +314,14 @@ const ChannelPage = () => {
                                     <Share2 className="mr-2 h-4 w-4" />
                                     Share
                                 </Button>
-                                <Button
-                                    variant="outline"
+                                <ReportButton
+                                    contentType="channel"
+                                    contentId={channelData._id}
+                                    contentTitle={channelData.fullname}
                                     size="sm"
+                                    variant="outline"
                                     className="flex-1 md:flex-none"
-                                >
-                                    <Flag className="mr-2 h-4 w-4" />
-                                    Report
-                                </Button>
+                                />
                             </div>
                         </div>
                     </div>
@@ -373,8 +374,8 @@ const ChannelPage = () => {
                             videoViewMode === "grid" ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {channelVideos.map((video) => (
-                                        <Card 
-                                            key={video._id} 
+                                        <Card
+                                            key={video._id}
                                             className="cursor-pointer hover:shadow-md transition-all duration-200 group"
                                             onClick={() => navigate(`/watch/${video._id}`)}
                                         >
@@ -415,8 +416,8 @@ const ChannelPage = () => {
                             ) : (
                                 <div className="space-y-4">
                                     {channelVideos.map((video) => (
-                                        <Card 
-                                            key={video._id} 
+                                        <Card
+                                            key={video._id}
                                             className="cursor-pointer hover:shadow-md transition-shadow"
                                             onClick={() => navigate(`/watch/${video._id}`)}
                                         >
@@ -435,7 +436,7 @@ const ChannelPage = () => {
                                                             <Play className="h-6 w-6 text-white" />
                                                         </div>
                                                     </div>
-                                                    
+
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="font-medium line-clamp-2 doto-font hover:text-primary transition-colors">
                                                             {video.title}
@@ -496,8 +497,8 @@ const ChannelPage = () => {
                                             <div>
                                                 <p className="text-sm text-muted-foreground">Joined</p>
                                                 <p className="font-medium">
-                                                    {new Date(channelData.createdAt).toLocaleDateString('en-US', { 
-                                                        year: 'numeric', 
+                                                    {new Date(channelData.createdAt).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
                                                         month: 'long',
                                                         day: 'numeric'
                                                     })}
@@ -546,8 +547,8 @@ const ChannelPage = () => {
                                             </div>
                                             <div className="text-center p-4 bg-muted/50 rounded-lg">
                                                 <div className="text-2xl font-bold text-purple-500">
-                                                    {channelVideos.length > 0 
-                                                        ? Math.floor(channelStats?.totalViews / channelVideos.length) 
+                                                    {channelVideos.length > 0
+                                                        ? Math.floor(channelStats?.totalViews / channelVideos.length)
                                                         : 0
                                                     }
                                                 </div>

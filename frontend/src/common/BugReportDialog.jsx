@@ -1,4 +1,4 @@
-// src/components/common/BugReportDialog.jsx
+// src/components/common/BugReportDialog.jsx - Enhanced version
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,35 +8,70 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/hooks/use-toast'
-import { Bug, Send, Loader2 } from 'lucide-react'
+import { Bug, Send, Loader2, Flag, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
-const BugReportDialog = ({ errorId, error }) => {
-    const [open, setOpen] = useState(false)
+const BugReportDialog = ({ 
+    isOpen, 
+    onClose, 
+    errorId, 
+    error,
+    contentType = null, // "video", "channel", "comment", etc.
+    contentId = null,
+    contentTitle = "",
+    isContentReport = false 
+}) => {
     const [submitting, setSubmitting] = useState(false)
+    const [reportType, setReportType] = useState(isContentReport ? 'inappropriate' : 'bug')
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        stepsToReproduce: '',
-        expectedBehavior: '',
+        category: '',
+        severity: 'medium',
         userEmail: ''
     })
     const { user } = useAuth()
     const { toast } = useToast()
+
+    // Report categories based on type
+    const contentReportCategories = [
+        { value: 'inappropriate', label: 'Inappropriate Content', description: 'Content violates community guidelines' },
+        { value: 'spam', label: 'Spam or Misleading', description: 'Spam, scam, or misleading content' },
+        { value: 'copyright', label: 'Copyright Violation', description: 'Unauthorized use of copyrighted material' },
+        { value: 'harassment', label: 'Harassment or Bullying', description: 'Content that harasses or bullies others' },
+        { value: 'violence', label: 'Violence or Dangerous Acts', description: 'Content showing violence or dangerous activities' },
+        { value: 'other', label: 'Other', description: 'Other policy violations' }
+    ]
+
+    const bugCategories = [
+        { value: 'ui', label: 'User Interface Issue', description: 'Button not working, layout problems' },
+        { value: 'video', label: 'Video Playback', description: 'Video won\'t play, loading issues' },
+        { value: 'account', label: 'Account Issues', description: 'Login, profile, settings problems' },
+        { value: 'performance', label: 'Performance', description: 'Slow loading, crashes, freezing' },
+        { value: 'feature', label: 'Feature Request', description: 'Suggestion for new feature' },
+        { value: 'other', label: 'Other', description: 'Other technical issues' }
+    ]
+
+    const categories = isContentReport ? contentReportCategories : bugCategories
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setSubmitting(true)
 
         try {
-            const bugReport = {
+            const reportData = {
+                type: isContentReport ? 'content_report' : 'bug_report',
+                reportType,
                 ...formData,
+                contentType,
+                contentId,
+                contentTitle,
                 errorId,
                 errorMessage: error?.message,
                 url: window.location.href,
@@ -46,35 +81,40 @@ const BugReportDialog = ({ errorId, error }) => {
                 userEmail: formData.userEmail || user?.email
             }
 
-            const response = await fetch('/api/v1/bugs/report', {
+            const endpoint = isContentReport ? '/api/v1/reports/content' : '/api/v1/bugs/report'
+            
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
                 },
-                body: JSON.stringify(bugReport)
+                body: JSON.stringify(reportData)
             })
 
             if (response.ok) {
                 toast({
-                    title: "Bug Report Submitted! 🐛",
-                    description: "Thank you for helping us improve Pixels. We'll investigate this issue.",
+                    title: isContentReport ? "Report Submitted! 🚨" : "Bug Report Submitted! 🐛",
+                    description: isContentReport 
+                        ? "Thank you for keeping Pixels safe. We'll review this content."
+                        : "Thank you for helping us improve Pixels. We'll investigate this issue.",
                 })
-                setOpen(false)
+                onClose()
                 setFormData({
                     title: '',
                     description: '',
-                    stepsToReproduce: '',
-                    expectedBehavior: '',
+                    category: '',
+                    severity: 'medium',
                     userEmail: ''
                 })
+                setReportType(isContentReport ? 'inappropriate' : 'bug')
             } else {
-                throw new Error('Failed to submit bug report')
+                throw new Error('Failed to submit report')
             }
         } catch (err) {
             toast({
                 title: "Submission Failed",
-                description: "Unable to submit bug report. Please try again later.",
+                description: "Unable to submit report. Please try again later.",
                 variant: "destructive",
             })
         } finally {
@@ -82,93 +122,154 @@ const BugReportDialog = ({ errorId, error }) => {
         }
     }
 
+    const getDialogTitle = () => {
+        if (isContentReport) {
+            return `Report ${contentType === 'video' ? 'Video' : contentType === 'channel' ? 'Channel' : 'Content'}`
+        }
+        return "Report a Bug"
+    }
+
+    const getDialogDescription = () => {
+        if (isContentReport) {
+            return `Help us keep Pixels safe by reporting content that violates our community guidelines.`
+        }
+        return "Help us fix this issue by providing detailed information about what happened."
+    }
+
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" className="w-full">
-                    <Bug className="mr-2 h-4 w-4" />
-                    Report This Bug
-                </Button>
-            </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>Report a Bug</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2">
+                        {isContentReport ? (
+                            <Flag className="h-5 w-5 text-red-500" />
+                        ) : (
+                            <Bug className="h-5 w-5" />
+                        )}
+                        {getDialogTitle()}
+                    </DialogTitle>
                     <DialogDescription>
-                        Help us fix this issue by providing detailed information about what happened.
+                        {getDialogDescription()}
                     </DialogDescription>
                 </DialogHeader>
-
+                
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2 sm:col-span-1">
-                            <Label htmlFor="title">Bug Title *</Label>
-                            <Input
-                                id="title"
-                                placeholder="Brief description of the issue"
-                                value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="col-span-2 sm:col-span-1">
-                            <Label htmlFor="userEmail">Your Email</Label>
-                            <Input
-                                id="userEmail"
-                                type="email"
-                                placeholder="For follow-up (optional)"
-                                value={formData.userEmail || user?.email || ''}
-                                onChange={(e) => setFormData({ ...formData, userEmail: e.target.value })}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="description">What happened? *</Label>
-                        <Textarea
-                            id="description"
-                            placeholder="Describe the issue you encountered..."
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            rows={3}
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="stepsToReproduce">Steps to Reproduce</Label>
-                        <Textarea
-                            id="stepsToReproduce"
-                            placeholder="1. Go to...&#10;2. Click on...&#10;3. See error"
-                            value={formData.stepsToReproduce}
-                            onChange={(e) => setFormData({ ...formData, stepsToReproduce: e.target.value })}
-                            rows={3}
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="expectedBehavior">Expected Behavior</Label>
-                        <Textarea
-                            id="expectedBehavior"
-                            placeholder="What should have happened instead?"
-                            value={formData.expectedBehavior}
-                            onChange={(e) => setFormData({ ...formData, expectedBehavior: e.target.value })}
-                            rows={2}
-                        />
-                    </div>
-
-                    {errorId && (
+                    {/* Content Info (for content reports) */}
+                    {isContentReport && contentTitle && (
                         <div className="bg-muted/50 rounded-lg p-3">
-                            <p className="text-sm text-muted-foreground">
-                                <strong>Error ID:</strong> {errorId}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                This will help our developers identify and fix the issue.
+                            <p className="text-sm font-medium">Reporting: {contentTitle}</p>
+                            <p className="text-xs text-muted-foreground">
+                                {contentType === 'video' ? 'Video' : 'Channel'} • ID: {contentId}
                             </p>
                         </div>
                     )}
 
+                    {/* Report Category */}
+                    <div>
+                        <Label className="text-base font-medium">
+                            {isContentReport ? "Why are you reporting this?" : "What type of issue is this?"} *
+                        </Label>
+                        <RadioGroup
+                            value={formData.category}
+                            onValueChange={(value) => setFormData({...formData, category: value})}
+                            className="mt-3"
+                        >
+                            {categories.map((category) => (
+                                <div key={category.value} className="flex items-start space-x-2 space-y-0">
+                                    <RadioGroupItem 
+                                        value={category.value} 
+                                        id={category.value}
+                                        className="mt-1"
+                                    />
+                                    <div className="flex-1">
+                                        <Label 
+                                            htmlFor={category.value}
+                                            className="text-sm font-medium cursor-pointer"
+                                        >
+                                            {category.label}
+                                        </Label>
+                                        <p className="text-xs text-muted-foreground">
+                                            {category.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </RadioGroup>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                        <Label htmlFor="description">
+                            {isContentReport ? "Additional details (optional)" : "What happened? *"}
+                        </Label>
+                        <Textarea
+                            id="description"
+                            placeholder={
+                                isContentReport 
+                                    ? "Provide any additional context about why this content should be reviewed..."
+                                    : "Describe the issue you encountered..."
+                            }
+                            value={formData.description}
+                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            rows={4}
+                            required={!isContentReport}
+                        />
+                    </div>
+
+                    {/* Severity (for bug reports only) */}
+                    {!isContentReport && (
+                        <div>
+                            <Label>Severity</Label>
+                            <RadioGroup
+                                value={formData.severity}
+                                onValueChange={(value) => setFormData({...formData, severity: value})}
+                                className="mt-2 flex gap-6"
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="low" id="low" />
+                                    <Label htmlFor="low" className="text-sm">Low</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="medium" id="medium" />
+                                    <Label htmlFor="medium" className="text-sm">Medium</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="high" id="high" />
+                                    <Label htmlFor="high" className="text-sm">High</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                    )}
+
+                    {/* Contact Email */}
+                    <div>
+                        <Label htmlFor="userEmail">Your Email (optional)</Label>
+                        <Input
+                            id="userEmail"
+                            type="email"
+                            placeholder="For follow-up if needed"
+                            value={formData.userEmail || user?.email || ''}
+                            onChange={(e) => setFormData({...formData, userEmail: e.target.value})}
+                        />
+                    </div>
+
+                    {/* Warning for content reports */}
+                    {isContentReport && (
+                        <div className="flex gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                                <p className="font-medium text-yellow-800 dark:text-yellow-200">
+                                    Please report responsibly
+                                </p>
+                                <p className="text-yellow-700 dark:text-yellow-300">
+                                    False reports may result in restrictions on your account. Only report content that genuinely violates our guidelines.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                        <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={submitting}>

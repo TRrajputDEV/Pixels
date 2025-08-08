@@ -33,6 +33,8 @@ import videoService from "@/services/VideoService"
 import VideoLikeButton from "@/components/ui/VideoLikeButton"
 import CommentSection from "@/components/comments/CommentSection"
 import SubscribeButton from "@/components/ui/SubscribeButton"
+import ReportButton from '@/common/ReportButton'
+
 
 // Enhanced Video Player Component
 const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) => {
@@ -505,10 +507,13 @@ const WatchVideo = () => {
                                             <Share2 className="h-4 w-4 mr-2" />
                                             Share
                                         </Button>
-                                        <Button variant="outline" size="sm">
-                                            <Flag className="h-4 w-4 mr-2" />
-                                            Report
-                                        </Button>
+                                        <ReportButton
+                                            contentType="video"
+                                            contentId={video._id}
+                                            contentTitle={video.title}
+                                            size="sm"
+                                            variant="outline"
+                                        />
                                     </div>
                                 </div>
                             </div>
