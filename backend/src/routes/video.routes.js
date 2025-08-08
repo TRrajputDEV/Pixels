@@ -10,7 +10,7 @@ import {
 } from "../controllers/video.controller.js"
 import {VerifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
-import { getVideoSecureUrl } from "../controllers/video.controller.js"
+
 const router = Router();
 
 // Public routes (no auth required)
@@ -40,7 +40,5 @@ router
     .patch(upload.single("thumbnail"), updateVideo);
 
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
-
-router.route("/secure-url/:videoId").post(VerifyJWT, getVideoSecureUrl)
 
 export default router
