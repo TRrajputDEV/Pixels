@@ -1,46 +1,162 @@
+class ApiError extends Error {
+    constructor(type, status, message) {
+        super(message);
+        this.name = 'ApiError';
+        this.type = type;
+        this.status = status;
+    }
+}
+
 class ApiService {
     constructor() {
         this.baseURL = 'http://localhost:8000/api/v1';
+        this.retryDelays = [1000, 2000, 4000];
     }
 
     // Make the Request - handles both JSON and FormData
+    async requestWithRetry(endpoint, options = {}, maxRetries = 3) {
+        let lastError;
+
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                const response = await this.makeRequest(endpoint, options);
+                
+                // If successful, return response
+                if (response.ok || response.status < 500) {
+                    return response;
+                }
+                
+                // Server error, retry if not last attempt
+                if (attempt < maxRetries - 1) {
+                    await this.delay(this.retryDelays[attempt] || 4000);
+                    continue;
+                }
+                
+            } catch (error) {
+                lastError = error;
+                
+                // Network error, retry if not last attempt
+                if (attempt < maxRetries - 1 && this.isNetworkError(error)) {
+                    await this.delay(this.retryDelays[attempt] || 4000);
+                    continue;
+                }
+                
+                throw error;
+            }
+        }
+        
+        throw lastError || new Error('Max retries exceeded');
+    }
+
+    async makeRequest(endpoint, options) {
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const config = {
+            ...options,
+            headers,
+            credentials: 'include'
+        };
+
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, config);
+            
+            // Handle specific HTTP errors
+            if (response.status === 401) {
+                this.handleUnauthorized();
+                throw new ApiError('Unauthorized', 401, 'Please sign in again');
+            }
+            
+            if (response.status === 403) {
+                throw new ApiError('Forbidden', 403, 'You don\'t have permission to perform this action');
+            }
+            
+            if (response.status === 404) {
+                throw new ApiError('Not Found', 404, 'The requested resource was not found');
+            }
+            
+            if (response.status >= 500) {
+                throw new ApiError('Server Error', response.status, 'Server is temporarily unavailable');
+            }
+
+            return response;
+            
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            
+            if (!navigator.onLine) {
+                throw new ApiError('Network Error', 0, 'No internet connection');
+            }
+            
+            throw new ApiError('Network Error', 0, 'Failed to connect to server');
+        }
+    }
+
     async request(endpoint, options = {}) {
         try {
-            const headers = {};
-
-            // Only set Content-Type for JSON requests, let browser set it for FormData
-            if (options.body && typeof options.body === 'string') {
-                headers['Content-Type'] = 'application/json';
+            const response = await this.requestWithRetry(endpoint, options);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new ApiError(
+                    errorData.type || 'Request Failed',
+                    response.status,
+                    errorData.message || `Request failed with status ${response.status}`
+                );
             }
-
-            const response = await fetch(`${this.baseURL}${endpoint}`, {
-                headers: { ...headers, ...(options.headers || {}) },
-                ...options,
-                credentials: 'include',
-            });
 
             const contentType = response.headers.get('content-type');
-
-            if (!response.ok) {
-                let errorMessage = `Request failed with status ${response.status}`;
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorData.error || errorMessage;
-                } else {
-                    const text = await response.text();
-                    console.warn("Non-JSON error response:", text);
-                }
-                return { error: errorMessage };
-            }
-
             if (contentType && contentType.includes('application/json')) {
-                return await response.json();
-            } else {
-                return { error: 'Invalid response format: expected JSON.' };
+                const data = await response.json();
+                return { ...data, success: true };
             }
+
+            return { success: true };
+            
         } catch (error) {
-            return { error: error.message || 'Network error' };
+            console.error('API Request Error:', error);
+            
+            return {
+                error: error.message || 'An unexpected error occurred',
+                success: false,
+                status: error.status || 0,
+                type: error.type || 'Unknown Error'
+            };
         }
+    }
+
+    handleUnauthorized() {
+        // Clear auth data
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        
+        // Redirect to login if not already there
+        if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+        }
+    }
+
+    isNetworkError(error) {
+        return (
+            error.name === 'TypeError' ||
+            error.message.includes('fetch') ||
+            error.message.includes('network') ||
+            !navigator.onLine
+        );
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     // ===== AUTHENTICATION METHODS =====
@@ -194,3 +310,4 @@ class ApiService {
 
 const apiService = new ApiService();
 export default apiService;
+export {ApiError}

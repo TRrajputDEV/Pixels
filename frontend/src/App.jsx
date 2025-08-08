@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx - Complete Updated Version with Error Handling
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "@/context/AuthContext"
 import { ThemeProvider } from "@/context/ThemeContext"
@@ -21,77 +21,152 @@ import VideoUpload from "@/components/upload/VideoUpload"
 import SearchResults from "@/components/search/SearchResults"
 import ChannelPage from "@/components/channel/ChannelPage"
 
-// coming soon features: 
+// Coming soon features
 import ExplorePage from "@/components/pages/ExplorePage"
 import TrendingPage from "@/components/pages/TrendingPage"
 import WatchLaterPage from "@/components/pages/WatchLaterPage"
 import PlaylistsPage from "@/components/pages/PlaylistsPage"
 import HistoryPage from "@/components/pages/HistoryPage"
-import ComingSoon from "./common/ComingSoon"
-import { Video } from "lucide-react"
-import { ThumbsUp } from "lucide-react"
+import ComingSoon from "@/common/ComingSoon"
 
+// Icons for coming soon pages
+import { 
+    Video, 
+    ThumbsUp, 
+    Settings, 
+    HelpCircle, 
+    Info 
+} from "lucide-react"
+
+// Error handling components
+import ErrorBoundary from "@/common/ErrorBoundary"
+import NetworkStatus from "@/common/NetworkStatus"
 
 function App() {
     return (
         <ThemeProvider>
             <AuthProvider>
-                <Router>
-                    <Routes>
-                        {/* Auth Routes (no layout) */}
-                        <Route path="/login" element={<LoginForm />} />
+                <ErrorBoundary>
+                    <Router>
+                        <NetworkStatus />
+                        <Routes>
+                            {/* Auth Routes (no layout) */}
+                            <Route path="/login" element={<LoginForm />} />
 
-                        {/* Main App Routes (with layout) */}
-                        <Route path="/*" element={
-                            <AppLayout>
-                                <Routes>
-                                    <Route path="/" element={<HomePage />} />
-                                    <Route path="/watch/:videoId" element={<WatchVideo />} />
-                                    <Route path="/search" element={<SearchResults />} />
+                            {/* Main App Routes (with layout) */}
+                            <Route path="/*" element={
+                                <AppLayout>
+                                    <Routes>
+                                        {/* Public Routes */}
+                                        <Route path="/" element={<HomePage />} />
+                                        <Route path="/watch/:videoId" element={<WatchVideo />} />
+                                        <Route path="/search" element={<SearchResults />} />
+                                        <Route path="/channel/:username" element={<ChannelPage />} />
+                                        <Route path="/c/:username" element={<ChannelPage />} />
 
-                                    {/* Protected Routes */}
-                                    <Route path="/dashboard" element={
-                                        <ProtectedRoute><Dashboard /></ProtectedRoute>
-                                    } />
-                                    <Route path="/profile" element={
-                                        <ProtectedRoute><UserProfile /></ProtectedRoute>
-                                    } />
-                                    <Route path="/my-videos" element={
-                                        <ProtectedRoute><MyVideos /></ProtectedRoute>
-                                    } />
-                                    <Route path="/edit-video/:videoId" element={
-                                        <ProtectedRoute><EditVideo /></ProtectedRoute>
-                                    } />
-                                    <Route path="/analytics" element={
-                                        <ProtectedRoute><Analytics /></ProtectedRoute>
-                                    } />
-                                    <Route path="/subscriptions" element={
-                                        <ProtectedRoute><MySubscriptions /></ProtectedRoute>
-                                    } />
-                                    <Route path="/feed" element={
-                                        <ProtectedRoute><SubscriptionFeed /></ProtectedRoute>
-                                    } />
-                                    <Route path="/upload" element={
-                                        <ProtectedRoute><VideoUpload /></ProtectedRoute>
-                                    } />
-                                    <Route path="/explore" element={<ExplorePage />} />
-                                    <Route path="/trending" element={<TrendingPage />} />
-                                    <Route path="/watch-later" element={<WatchLaterPage />} />
-                                    <Route path="/playlists" element={<PlaylistsPage />} />
-                                    <Route path="/history" element={<HistoryPage />} />
-                                    <Route path="/liked-videos" element={<ComingSoon feature="Liked Videos" icon={() => <ThumbsUp />} />} />
-                                    <Route path="/studio" element={<ComingSoon feature="Creator Studio" icon={() => <Video />} />} />
-                                    <Route path="/settings" element={<ComingSoon feature="Settings" icon={() => <Settings />} />} />
-                                    <Route path="/help" element={<ComingSoon feature="Help Center" icon={() => <HelpCircle />} />} />
-                                    <Route path="/about" element={<ComingSoon feature="About Page" icon={() => <Info />} />} />
-                                    <Route path="/channel/:username" element={<ChannelPage />} />
-                                    <Route path="/c/:username" element={<ChannelPage />} />  {/* Alternative route */}
-                                </Routes>
-                            </AppLayout>
-                        } />
-                    </Routes>
-                    <Toaster />
-                </Router>
+                                        {/* Coming Soon Public Routes */}
+                                        <Route path="/explore" element={<ExplorePage />} />
+                                        <Route path="/trending" element={<TrendingPage />} />
+
+                                        {/* Protected Routes */}
+                                        <Route path="/dashboard" element={
+                                            <ProtectedRoute><Dashboard /></ProtectedRoute>
+                                        } />
+                                        <Route path="/profile" element={
+                                            <ProtectedRoute><UserProfile /></ProtectedRoute>
+                                        } />
+                                        <Route path="/my-videos" element={
+                                            <ProtectedRoute><MyVideos /></ProtectedRoute>
+                                        } />
+                                        <Route path="/edit-video/:videoId" element={
+                                            <ProtectedRoute><EditVideo /></ProtectedRoute>
+                                        } />
+                                        <Route path="/analytics" element={
+                                            <ProtectedRoute><Analytics /></ProtectedRoute>
+                                        } />
+                                        <Route path="/subscriptions" element={
+                                            <ProtectedRoute><MySubscriptions /></ProtectedRoute>
+                                        } />
+                                        <Route path="/feed" element={
+                                            <ProtectedRoute><SubscriptionFeed /></ProtectedRoute>
+                                        } />
+                                        <Route path="/upload" element={
+                                            <ProtectedRoute><VideoUpload /></ProtectedRoute>
+                                        } />
+
+                                        {/* Protected Coming Soon Routes */}
+                                        <Route path="/watch-later" element={
+                                            <ProtectedRoute><WatchLaterPage /></ProtectedRoute>
+                                        } />
+                                        <Route path="/playlists" element={
+                                            <ProtectedRoute><PlaylistsPage /></ProtectedRoute>
+                                        } />
+                                        <Route path="/history" element={
+                                            <ProtectedRoute><HistoryPage /></ProtectedRoute>
+                                        } />
+                                        <Route path="/liked-videos" element={
+                                            <ProtectedRoute>
+                                                <ComingSoon 
+                                                    feature="Liked Videos" 
+                                                    description="Keep track of all the videos you've liked and easily find them again!"
+                                                    icon={ThumbsUp}
+                                                    estimatedDate="Coming in February 2024"
+                                                />
+                                            </ProtectedRoute>
+                                        } />
+                                        <Route path="/studio" element={
+                                            <ProtectedRoute>
+                                                <ComingSoon 
+                                                    feature="Creator Studio" 
+                                                    description="Advanced creator tools for managing your channel and content professionally!"
+                                                    icon={Video}
+                                                    estimatedDate="Coming in March 2024"
+                                                />
+                                            </ProtectedRoute>
+                                        } />
+
+                                        {/* Settings & Info Routes */}
+                                        <Route path="/settings" element={
+                                            <ComingSoon 
+                                                feature="Settings" 
+                                                description="Customize your Pixels experience with advanced settings and preferences!"
+                                                icon={Settings}
+                                                estimatedDate="Coming in January 2024"
+                                            />
+                                        } />
+                                        <Route path="/help" element={
+                                            <ComingSoon 
+                                                feature="Help Center" 
+                                                description="Get support, tutorials, and answers to frequently asked questions!"
+                                                icon={HelpCircle}
+                                                estimatedDate="Coming in January 2024"
+                                            />
+                                        } />
+                                        <Route path="/about" element={
+                                            <ComingSoon 
+                                                feature="About Page" 
+                                                description="Learn more about Pixels, our mission, and the team behind the platform!"
+                                                icon={Info}
+                                                estimatedDate="Coming Soon"
+                                            />
+                                        } />
+
+                                        {/* 404 Route */}
+                                        <Route path="*" element={
+                                            <ComingSoon 
+                                                feature="Page Not Found" 
+                                                description="The page you're looking for doesn't exist. Let's get you back to the good stuff!"
+                                                icon={Info}
+                                                estimatedDate="Available Now"
+                                            />
+                                        } />
+                                    </Routes>
+                                </AppLayout>
+                            } />
+                        </Routes>
+                        <Toaster />
+                    </Router>
+                </ErrorBoundary>
             </AuthProvider>
         </ThemeProvider>
     )
