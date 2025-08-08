@@ -1,7 +1,7 @@
 // src/services/VideoService.js
 class VideoService {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api/v1';
+        this.baseURL = import.meta.env.VITE_API_URL;
     }
     // Get token from localStorage (matching your existing auth system)
     getAuthHeaders() {

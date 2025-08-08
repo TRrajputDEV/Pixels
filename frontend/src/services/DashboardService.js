@@ -1,7 +1,7 @@
 // src/services/DashboardService.js
 class DashboardService {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api/v1';
+        this.baseURL = import.meta.env.VITE_API_URL;
     }
 
     // Make authenticated requests

@@ -9,7 +9,7 @@ class ApiError extends Error {
 
 class ApiService {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api/v1';
+        this.baseURL = import.meta.env.VITE_API_URL;
         this.retryDelays = [1000, 2000, 4000];
     }
 
