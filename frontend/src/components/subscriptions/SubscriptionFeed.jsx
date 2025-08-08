@@ -58,10 +58,7 @@ const SubscriptionFeed = () => {
                 setError(null)
 
                 // First, get user's subscriptions
-                const subscriptionsResult = await subscriptionService.getSubscribedChannels(user._id, {
-                    page: 1,
-                    limit: 50
-                })
+                const subscriptionsResult = await subscriptionService.getSubscribedChannels({ page: 1, limit: 50 })
 
                 if (subscriptionsResult.success) {
                     const userSubscriptions = subscriptionsResult.data.subscribedChannels || []

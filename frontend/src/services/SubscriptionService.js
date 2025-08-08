@@ -1,4 +1,4 @@
-// src/services/SubscriptionService.js
+// src/services/SubscriptionService.js - UPDATED
 class SubscriptionService {
     constructor() {
         this.baseURL = 'http://localhost:8000/api/v1';
@@ -56,24 +56,20 @@ class SubscriptionService {
         });
     }
 
-    // Get list of channels user has subscribed to
-    async getSubscribedChannels(subscriberId, params = {}) {
-        if (!subscriberId) {
-            return { error: 'Subscriber ID is required', success: false };
-        }
-
+    // FIXED: Get list of channels user has subscribed to
+    async getSubscribedChannels(params = {}) {
         const queryString = new URLSearchParams();
         if (params.page) queryString.append('page', params.page);
         if (params.limit) queryString.append('limit', params.limit);
 
         const endpoint = queryString.toString() 
-            ? `/subscriptions/c/${subscriberId}?${queryString}` 
-            : `/subscriptions/c/${subscriberId}`;
+            ? `/subscriptions/channels?${queryString}` 
+            : `/subscriptions/channels`;
 
         return this.request(endpoint);
     }
 
-    // Get subscribers of a channel
+    // FIXED: Get subscribers of a channel
     async getChannelSubscribers(channelId, params = {}) {
         if (!channelId) {
             return { error: 'Channel ID is required', success: false };
@@ -84,19 +80,10 @@ class SubscriptionService {
         if (params.limit) queryString.append('limit', params.limit);
 
         const endpoint = queryString.toString() 
-            ? `/subscriptions/u/${channelId}?${queryString}` 
-            : `/subscriptions/u/${channelId}`;
+            ? `/subscriptions/subscribers/${channelId}?${queryString}` 
+            : `/subscriptions/subscribers/${channelId}`;
 
         return this.request(endpoint);
-    }
-
-    // Check if user is subscribed to a channel
-    async checkSubscriptionStatus(channelId) {
-        if (!channelId) {
-            return { error: 'Channel ID is required', success: false };
-        }
-
-        return this.request(`/subscriptions/c/${channelId}`);
     }
 }
 

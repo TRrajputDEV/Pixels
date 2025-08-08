@@ -59,10 +59,7 @@ const MySubscriptions = () => {
                 setLoading(true)
                 setError(null)
 
-                const result = await subscriptionService.getSubscribedChannels(user._id, {
-                    page: 1,
-                    limit: 50
-                })
+                const result = await subscriptionService.getSubscribedChannels({ page: 1, limit: 50 })
 
                 if (result.success) {
                     setSubscriptions(result.data.subscribedChannels || [])

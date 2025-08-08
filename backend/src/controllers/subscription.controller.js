@@ -1,4 +1,4 @@
-// src/controllers/subscription.controller.js
+// src/controllers/subscription.controller.js - FIXED VERSION
 import mongoose, {isValidObjectId} from "mongoose"
 import {User} from "../models/user.model.js"
 import { Subscription } from "../models/subscription.model.js"
@@ -71,9 +71,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     }
 })
 
-// controller to return subscriber list of a channel
+// FIXED: Controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
-    const {channelId} = req.params
+    const {channelId} = req.params  // CHANGED: was subscriberId, now channelId
     const { page = 1, limit = 10 } = req.query
 
     // Validate channelId
@@ -163,20 +163,15 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     }
 })
 
-// controller to return channel list to which user has subscribed
+// FIXED: Controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
-    const { subscriberId } = req.params
+    // FIXED: Get subscriberId from authenticated user, not from params
+    const subscriberId = req.user._id
     const { page = 1, limit = 10 } = req.query
 
-    // Validate subscriberId
+    // Validate subscriberId (it comes from authenticated user, should be valid)
     if (!isValidObjectId(subscriberId)) {
         throw new ApiError(400, "Invalid subscriber ID")
-    }
-
-    // Check if subscriber exists
-    const subscriber = await User.findById(subscriberId)
-    if (!subscriber) {
-        throw new ApiError(404, "Subscriber not found")
     }
 
     try {
