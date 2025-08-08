@@ -345,75 +345,108 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         )
 })
 
+// src/controllers/user.controller.js - Add this method
+
 const getUserChannelProfile = asyncHandler(async (req, res) => {
     const { username } = req.params
+
     if (!username?.trim()) {
-        throw new ApiError(400, "Username is missing.")
+        throw new ApiError(400, "Username is missing")
     }
 
-    const channel = await User.aggregate([
-        {
-            $match: {
-                username: username?.toLowerCase()
+    try {
+        const channel = await User.aggregate([
+            {
+                $match: {
+                    username: username?.toLowerCase()
+                }
             },
-            $lookup: {
-                from: "subscriptions",
-                localField: "_id",
-                foreignField: "channel", // this get us the all about kon kon iss channel ko subscribe krke rakha hai Means 1 M subscriber
-                as: "subscribers"
-            }
-        },
-
-        {
-            $lookup: {
-                from: "subscriptions",
-                localField: "_id",
-                foreignField: "subscriber", // this gives us the ki iss user ne kis _id ko follow krta h hitesh -> kis kis ko follow // 200 ko follow krta h
-                as: "subscribedTo"
-            }
-        },
-
-        {
-            $addFields: {
-                subscribersCount: {
-                    $size: "$subscribers"
-                },
-                channelssubscribedToCount: {
-                    $size: "$subscribedTo"
-                },
-                isSubscribed: {
-                    $cond: {
-                        if: {$in: [req.user?._id, "$subscribers.subscriber"] },
-                        then: true,
-                        else: false
+            {
+                $lookup: {
+                    from: "subscriptions",
+                    localField: "_id",
+                    foreignField: "channel",
+                    as: "subscribers"
+                }
+            },
+            {
+                $lookup: {
+                    from: "subscriptions", 
+                    localField: "_id",
+                    foreignField: "subscriber",
+                    as: "subscribedTo"
+                }
+            },
+            {
+                $lookup: {
+                    from: "videos",
+                    localField: "_id", 
+                    foreignField: "owner",
+                    as: "videos",
+                    pipeline: [
+                        {
+                            $match: {
+                                isPublished: true
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $addFields: {
+                    subscriberCount: {
+                        $size: "$subscribers"
+                    },
+                    channelsSubscribedToCount: {
+                        $size: "$subscribedTo"
+                    },
+                    videosCount: {
+                        $size: "$videos"
+                    },
+                    totalViews: {
+                        $sum: "$videos.view"
+                    },
+                    isSubscribed: {
+                        $cond: {
+                            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                            then: true,
+                            else: false
+                        }
                     }
                 }
+            },
+            {
+                $project: {
+                    fullname: 1,
+                    username: 1,
+                    subscriberCount: 1,
+                    channelsSubscribedToCount: 1,
+                    videosCount: 1,
+                    totalViews: 1,
+                    isSubscribed: 1,
+                    avatar: 1,
+                    coverImage: 1,
+                    email: 1,
+                    createdAt: 1
+                }
             }
-        },
+        ])
 
-        {
-            $project: {
-                fullname: 1,
-                username: 1,
-                subscribersCount: 1,
-                channelssubscribedToCount: 1,
-                isSubscribed: 1,
-                avatar: 1,
-                coverImage: 1,
-                email: 1
-            }
+        if (!channel?.length) {
+            throw new ApiError(404, "Channel does not exist")
         }
-    ])
 
-    if (!channel?.length){
-        throw new ApiError(404, "channel does not exists")
+        return res
+            .status(200)
+            .json(new ApiResponse(
+                200,
+                channel[0],
+                "User channel fetched successfully"
+            ))
+
+    } catch (error) {
+        throw new ApiError(500, `Error fetching channel profile: ${error.message}`)
     }
-    return res
-        .status(200)
-        .json(
-            new ApiResponse(200, channel[0], "User channel fetched successfully.")
-        )
-
 })
 
 const getWatchHistory = asyncHandler(async (req, res) => {

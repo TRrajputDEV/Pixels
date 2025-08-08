@@ -19,6 +19,7 @@ import MySubscriptions from "@/components/subscriptions/MySubscriptions"
 import SubscriptionFeed from "@/components/subscriptions/SubscriptionFeed"
 import VideoUpload from "@/components/upload/VideoUpload"
 import SearchResults from "@/components/search/SearchResults"
+import ChannelPage from "@/components/channel/ChannelPage"
 
 // coming soon features: 
 import ExplorePage from "@/components/pages/ExplorePage"
@@ -83,6 +84,8 @@ function App() {
                                     <Route path="/settings" element={<ComingSoon feature="Settings" icon={() => <Settings />} />} />
                                     <Route path="/help" element={<ComingSoon feature="Help Center" icon={() => <HelpCircle />} />} />
                                     <Route path="/about" element={<ComingSoon feature="About Page" icon={() => <Info />} />} />
+                                    <Route path="/channel/:username" element={<ChannelPage />} />
+                                    <Route path="/c/:username" element={<ChannelPage />} />  {/* Alternative route */}
                                 </Routes>
                             </AppLayout>
                         } />

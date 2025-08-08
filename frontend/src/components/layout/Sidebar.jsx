@@ -166,19 +166,16 @@ const Sidebar = ({ isOpen, className = "" }) => {
     const NavItem = ({ item, isActive }) => (
         <Button
             variant={isActive ? "secondary" : "ghost"}
-            className={`w-full justify-start h-auto p-3 ${
-                item.highlight ? "bg-primary/10 hover:bg-primary/20 border border-primary/20" : ""
-            } ${isActive ? "bg-secondary" : ""}`}
+            className={`w-full justify-start h-auto p-3 ${item.highlight ? "bg-primary/10 hover:bg-primary/20 border border-primary/20" : ""
+                } ${isActive ? "bg-secondary" : ""}`}
             onClick={() => navigate(item.href)}
         >
-            <item.icon className={`h-5 w-5 mr-3 ${
-                item.highlight ? "text-primary" : ""
-            } ${isActive ? "text-primary" : ""}`} />
+            <item.icon className={`h-5 w-5 mr-3 ${item.highlight ? "text-primary" : ""
+                } ${isActive ? "text-primary" : ""}`} />
             <div className="flex-1 text-left">
                 <div className="flex items-center gap-2">
-                    <span className={`font-medium ${
-                        item.highlight ? "text-primary" : ""
-                    }`}>
+                    <span className={`font-medium ${item.highlight ? "text-primary" : ""
+                        }`}>
                         {item.title}
                     </span>
                     {item.badge && (
@@ -205,7 +202,7 @@ const Sidebar = ({ isOpen, className = "" }) => {
     return (
         <div className={`flex flex-col h-full bg-background border-r ${className}`}>
             {/* Sidebar Header */}
-            
+
 
             <ScrollArea className="flex-1 px-2 py-4">
                 <div className="space-y-6">
@@ -284,9 +281,9 @@ const Sidebar = ({ isOpen, className = "" }) => {
                             <div className="p-3">
                                 <div className="flex items-center gap-3 mb-3">
                                     <Avatar className="h-10 w-10">
-                                        <AvatarImage 
-                                            src={user?.avatar} 
-                                            alt={user?.fullname} 
+                                        <AvatarImage
+                                            src={user?.avatar}
+                                            alt={user?.fullname}
                                         />
                                         <AvatarFallback>
                                             {user?.fullname?.[0]?.toUpperCase() || "U"}
@@ -310,13 +307,22 @@ const Sidebar = ({ isOpen, className = "" }) => {
                                     <User className="mr-2 h-4 w-4" />
                                     Edit Profile
                                 </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full mt-1"
+                                    onClick={() => navigate(`/channel/${user?.username}`)}
+                                >
+                                    <Users className="mr-2 h-4 w-4" />
+                                    My Channel
+                                </Button>
                             </div>
                         </>
                     )}
 
                     {/* Settings Section */}
                     <Separator />
-                    
+
                     <div>
                         <SectionTitle title="More" icon={Settings} />
                         <div className="space-y-1">
