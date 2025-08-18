@@ -1,3 +1,7 @@
+watch demo : https://drive.google.com/file/d/1LfoMOE7obG6GxCdbURKzo8NqHlRZTr9A/view?usp=sharing
+
+check linkedin: www.linkedin.com/in/tushartanwar183
+
 # 🎥 Pixels - A Full-Stack Video Streaming Platform
 
 > **This application began development on _June 30, 2025_**.  
