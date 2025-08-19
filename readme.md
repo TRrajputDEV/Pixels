@@ -108,12 +108,12 @@ Pixels is a one-man mission to deeply understand **full-stack architecture**, im
 ---
 
 ## 📸 Screenshots
-<img width="1902" height="1079" alt="Screenshot 2025-08-07 010343" src="https://github.com/user-attachments/assets/30f0c264-e767-4574-94d4-63a5c144f68d" />
-<img width="404" height="875" alt="Screenshot 2025-08-07 010319" src="https://github.com/user-attachments/assets/69bcffa7-8c4c-44f1-ab80-0dc10aff6a9e" />
-<img width="1896" height="1078" alt="Screenshot 2025-08-07 010234" src="https://github.com/user-attachments/assets/0e52e93d-ec60-4f3c-95f7-f6e280549352" />
-<img width="1918" height="1079" alt="Screenshot 2025-08-07 010201" src="https://github.com/user-attachments/assets/16cbdae3-948d-41a3-b8b2-5b2a392facef" />
-<img width="1898" height="1076" alt="Screenshot 2025-08-07 010147" src="https://github.com/user-attachments/assets/96639395-7279-4aaa-a6fb-06597a9fd7fd" />
-<img width="1905" height="1075" alt="Screenshot 2025-08-07 010119" src="https://github.com/user-attachments/assets/a9d5967c-bac8-48b7-98ec-fce5d69caa89" />
+<img width="1833" height="1016" alt="Screenshot 2025-08-07 171558" src="https://github.com/user-attachments/assets/7807e9d7-4b64-4fb6-9e0a-864305b91973" />
+<img width="1893" height="1071" alt="Screenshot 2025-08-07 171542" src="https://github.com/user-attachments/assets/9175aef9-8f38-46ce-80df-3759f6079754" />
+<img width="1896" height="1078" alt="Screenshot 2025-08-07 010234" src="https://github.com/user-attachments/assets/cb2a10ec-008e-4eb4-967c-2e1052043064" />
+
+<img width="1919" height="1079" alt="Screenshot 2025-08-07 171808" src="https://github.com/user-attachments/assets/a5b311a4-6e19-4a31-b6e8-7a334952aba2" />
+<img width="1919" height="1079" alt="Screenshot 2025-08-07 171748" src="https://github.com/user-attachments/assets/85783ef5-967a-493d-b2aa-93ed63adb52d" />
 
 ---
 
