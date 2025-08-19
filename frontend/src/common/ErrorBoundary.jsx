@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, RefreshCw, Bug, Home } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-
+import BugReportDialog from "@/common/BugReportDialog"
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props)

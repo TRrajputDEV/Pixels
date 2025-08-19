@@ -66,6 +66,60 @@ class VideoService {
     // ===== VIDEO CRUD OPERATIONS =====
 
     // Upload video method
+
+    // NEW: Get secure streaming URL
+    async getStreamingUrl(videoId) {
+        if (!videoId) {
+            return { error: 'Video ID is required', success: false };
+        }
+        return this.request(`/videos/${videoId}/stream`);
+    }
+
+    // Enhanced getVideoById with optional secure streaming
+    async getVideoById(videoId, options = {}) {
+        if (!videoId) {
+            return { error: 'Video ID is required', success: false };
+        }
+
+        try {
+            // Request secure URLs if specified
+            const queryParams = options.secure ? '?secure=true' : '';
+            const result = await this.request(`/videos/${videoId}${queryParams}`);
+
+            if (result.success && result.data) {
+                console.log("=== VIDEO SERVICE DEBUG ===");
+                console.log("Video data received:", result.data.title);
+                console.log("Secure stream:", result.data.secureStream);
+
+                // If backend indicates secure streaming, get the actual signed URL
+                if (result.data.secureStream && result.data.videoFile.startsWith('/api')) {
+                    console.log("Fetching secure streaming URL...");
+
+                    const streamResult = await this.getStreamingUrl(videoId);
+                    console.log("Stream result success:", streamResult.success);
+
+                    if (streamResult.success && streamResult.data?.streamingUrl) {
+                        result.data.videoFile = streamResult.data.streamingUrl;
+                        result.data.streamingExpiresAt = streamResult.data.expiresAt;
+                        console.log("Secure URL obtained successfully");
+                    } else {
+                        console.error("Failed to get streaming URL:", streamResult.error);
+                        // Fallback - could revert to direct URL or show error
+                        return { error: "Unable to load video securely", success: false };
+                    }
+                }
+            }
+
+            return result;
+        } catch (error) {
+            console.error("VideoService getVideoById error:", error);
+            return { error: error.message, success: false };
+        }
+    }
+
+
+
+
     async uploadVideo(videoData) {
         const formData = new FormData();
 
@@ -107,14 +161,6 @@ class VideoService {
 
         const endpoint = queryString.toString() ? `/videos?${queryString}` : '/videos';
         return this.request(endpoint);
-    }
-
-    // Get video by ID
-    async getVideoById(videoId) {
-        if (!videoId) {
-            return { error: 'Video ID is required', success: false };
-        }
-        return this.request(`/videos/${videoId}`);
     }
 
     // Update video details

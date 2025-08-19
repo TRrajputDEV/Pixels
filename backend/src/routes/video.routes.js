@@ -1,4 +1,4 @@
-// src/routes/video.routes.js
+// src/routes/video.routes.js - Add streaming route
 import { Router } from 'express';
 import {
     deleteVideo,
@@ -7,6 +7,7 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
+    streamVideo // Import new streaming method
 } from "../controllers/video.controller.js"
 import {VerifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -14,11 +15,14 @@ import {upload} from "../middlewares/multer.middleware.js"
 const router = Router();
 
 // Public routes (no auth required)
-router.route("/").get(getAllVideos); // Allow anonymous users to browse videos
-router.route("/:videoId").get(getVideoById); // Allow watching without auth
+router.route("/").get(getAllVideos);
+router.route("/:videoId").get(getVideoById);
+
+// NEW: Secure video streaming endpoint (no auth required for now, but can be added)
+router.route("/:videoId/stream").get(streamVideo);
 
 // Protected routes (auth required)
-router.use(VerifyJWT); // Apply auth middleware only to routes below
+router.use(VerifyJWT);
 
 router.route("/").post(
     upload.fields([
