@@ -1,4 +1,4 @@
-// src/utils/cloudinary.js - PROPERLY FIXED CLEANUP
+// src/utils/cloudinary.js - PROPERLY FIXED CLEANUP + HTTPS SECURE
 import { v2 as cloudinary } from "cloudinary";
 import fs from 'fs'
 import path from 'path'
@@ -6,7 +6,8 @@ import path from 'path'
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true  // ← ADD THIS LINE FOR HTTPS
 });
 
 const uploadOnCloudinary = async (localFilePath, resourceType = "auto") => {
@@ -16,7 +17,7 @@ const uploadOnCloudinary = async (localFilePath, resourceType = "auto") => {
         if (!localFilePath) return null;
 
         // Normalize path - this is crucial for Windows
-        normalizedPath = localFilePath.replace(/\\/g, '/');
+        normalizedPath = localFilePath.replace(/\\\\/g, '/');
         
         console.log("=== CLEANUP DEBUG ===");
         console.log("Original path:", localFilePath);
@@ -33,6 +34,7 @@ const uploadOnCloudinary = async (localFilePath, resourceType = "auto") => {
             folder: "pixels-videos",
             use_filename: true,
             unique_filename: false,
+            secure: true  // ← ADD THIS LINE FOR HTTPS URLS
         };
 
         if (resourceType === "video") {
@@ -86,7 +88,7 @@ const uploadLargeVideoOnCloudinary = async (localFilePath) => {
             return;
         }
 
-        const normalizedPath = localFilePath.replace(/\\/g, '/');
+        const normalizedPath = localFilePath.replace(/\\\\/g, '/');
         console.log("Large video upload path:", normalizedPath);
 
         cloudinary.uploader.upload_large(
@@ -97,6 +99,7 @@ const uploadLargeVideoOnCloudinary = async (localFilePath) => {
                 chunk_size: 20000000,
                 use_filename: true,
                 unique_filename: false,
+                secure: true  // ← ADD THIS LINE FOR HTTPS URLS
             },
             (error, result) => {
                 // CRITICAL: Always cleanup large files
@@ -123,7 +126,7 @@ const uploadLargeVideoOnCloudinary = async (localFilePath) => {
     });
 };
 
-// Keep your existing signed URL functions
+// Keep your existing signed URL functions - they already have secure: true
 const generateSignedVideoUrl = (publicId, options = {}) => {
     try {
         const defaultOptions = {
