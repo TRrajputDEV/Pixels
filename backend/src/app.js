@@ -6,6 +6,19 @@ import morgan from 'morgan';
 const app = express();
 app.use(morgan('combined'));
 
+// backend/src/app.js or index.js
+import fs from 'fs';
+
+// Ensure temp directory exists on startup
+const tempDir = './public/temp';
+if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+    console.log('✅ Created temp directory:', tempDir);
+} else {
+    console.log('✅ Temp directory exists:', tempDir);
+}
+
+
 const corsOptions = {
     origin: 'https://watchpixels.onrender.com',
     credentials: true,
@@ -17,8 +30,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // 🚀 INCREASE THESE LIMITS FROM 16KB TO 10MB
-app.use(express.json({limit: "10mb"}))
-app.use(express.urlencoded({extended: true, limit: "10mb"}))
+app.use(express.json({ limit: "10mb" }))
+app.use(express.urlencoded({ extended: true, limit: "10mb" }))
 app.use(express.static("public"))
 app.use(cookieParser())
 
@@ -33,8 +46,8 @@ import subscriptionRouter from './routes/subscription.routes.js'
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/videos", videoRouter)
 app.use("/api/v1/comments", commentRouter)
-app.use("/api/v1/likes", likeRouter) 
+app.use("/api/v1/likes", likeRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
 app.use("/api/v1/subscriptions", subscriptionRouter)
 
-export {app}
+export { app }
