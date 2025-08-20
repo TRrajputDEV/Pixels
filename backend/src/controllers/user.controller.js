@@ -149,10 +149,11 @@ const loginUser = asyncHandler(async (req, res) => {
     // Cookie options
     const options = {
         httpOnly: true,
-        secure: true,  // MUST be true for HTTPS
-        sameSite: 'None',  // Allow cross-site cookies
+        secure: true,              // MUST be true for HTTPS
+        sameSite: 'None',          // Allow cross-site cookies
+        partitioned: true,         // NEW: Add partitioned attribute
         maxAge: 24 * 60 * 60 * 1000, // 1 day
-        domain: undefined  // Don't set domain for cross-origin
+        path: '/'
     };
 
     return res

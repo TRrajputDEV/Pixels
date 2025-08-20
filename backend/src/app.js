@@ -10,7 +10,7 @@ app.use(morgan('combined'));
 // setting up the CORS configration so we can have the URI setup for API request Acceptance.
 // backend/src/app.js
 const corsOptions = {
-    origin: 'https://watchpixels.netlify.app',  // Your exact Netlify URL
+    origin: 'https://watchpixels.onrender.com/',  // Your exact Netlify URL
     credentials: true,  // CRITICAL: Allow cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
