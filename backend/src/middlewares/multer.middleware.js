@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 
 // Enhanced file filter for all upload types
 const fileFilter = (req, file, cb) => {
-    console.log('Processing file field:', file.fieldname, 'mimetype:', file.mimetype); // Debug log
+    // console.log('Processing file field:', file.fieldname, 'mimetype:', file.mimetype); // Debug log
     
     if (file.fieldname === 'videoFile') {
         // Accept only video files
@@ -47,7 +47,7 @@ const fileFilter = (req, file, cb) => {
         }
     } else {
         // Log unexpected field for debugging
-        console.log('Unexpected field received:', file.fieldname);
+        // console.log('Unexpected field received:', file.fieldname);
         cb(new Error(`Unexpected field: ${file.fieldname}`), false)
     }
 }
