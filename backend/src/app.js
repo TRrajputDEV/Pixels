@@ -3,16 +3,18 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import morgan from 'morgan';
 // making the server here from express
-
+// 'http://localhost:5173'
 const app = express();
 app.use(morgan('combined'));
 
 // setting up the CORS configration so we can have the URI setup for API request Acceptance.
+// backend/src/app.js
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    credentials: true,
+    origin: 'https://watchpixels.netlify.app',  // Your exact Netlify URL
+    credentials: true,  // CRITICAL: Allow cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));

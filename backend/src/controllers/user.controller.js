@@ -149,9 +149,11 @@ const loginUser = asyncHandler(async (req, res) => {
     // Cookie options
     const options = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Only secure in production
-        sameSite: 'strict'
-    }
+        secure: true,  // MUST be true for HTTPS
+        sameSite: 'None',  // Allow cross-site cookies
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        domain: undefined  // Don't set domain for cross-origin
+    };
 
     return res
         .status(200)
@@ -371,7 +373,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             },
             {
                 $lookup: {
-                    from: "subscriptions", 
+                    from: "subscriptions",
                     localField: "_id",
                     foreignField: "subscriber",
                     as: "subscribedTo"
@@ -380,7 +382,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             {
                 $lookup: {
                     from: "videos",
-                    localField: "_id", 
+                    localField: "_id",
                     foreignField: "owner",
                     as: "videos",
                     pipeline: [
