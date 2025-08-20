@@ -1,5 +1,6 @@
-// src/routes/video.routes.js - Add streaming route
+// src/routes/video.routes.js
 import { Router } from 'express';
+import express from 'express';
 import {
     deleteVideo,
     getAllVideos,
@@ -7,23 +8,26 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
-    streamVideo // Import new streaming method
+    streamVideo
 } from "../controllers/video.controller.js"
 import {VerifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
 
 const router = Router();
 
-// Public routes (no auth required)
+// JSON parsing middleware
+const jsonParser = express.json({ limit: '10mb' });
+const urlencodedParser = express.urlencoded({ extended: true, limit: '10mb' });
+
+// Public routes (no auth required, no JSON parsing needed for GET)
 router.route("/").get(getAllVideos);
 router.route("/:videoId").get(getVideoById);
-
-// NEW: Secure video streaming endpoint (no auth required for now, but can be added)
 router.route("/:videoId/stream").get(streamVideo);
 
 // Protected routes (auth required)
 router.use(VerifyJWT);
 
+// File upload route - NO JSON parsing, only Multer
 router.route("/").post(
     upload.fields([
         {
@@ -38,11 +42,13 @@ router.route("/").post(
     publishAVideo
 );
 
+// Routes that need JSON parsing and file upload
 router
     .route("/:videoId")
     .delete(deleteVideo)
-    .patch(upload.single("thumbnail"), updateVideo);
+    .patch(upload.single("thumbnail"), updateVideo); // Update might have JSON + file
 
-router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
+// Routes that need JSON parsing only
+router.route("/toggle/publish/:videoId").patch(jsonParser, urlencodedParser, togglePublishStatus);
 
 export default router

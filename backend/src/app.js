@@ -2,14 +2,12 @@ import express from 'express'
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import morgan from 'morgan';
+import fs from 'fs';
 
 const app = express();
 app.use(morgan('combined'));
 
-// backend/src/app.js or index.js
-import fs from 'fs';
-
-// Ensure temp directory exists on startup
+// Ensure temp directory exists
 const tempDir = './public/temp';
 if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
@@ -17,7 +15,6 @@ if (!fs.existsSync(tempDir)) {
 } else {
     console.log('✅ Temp directory exists:', tempDir);
 }
-
 
 const corsOptions = {
     origin: 'https://watchpixels.onrender.com',
@@ -29,13 +26,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// 🚀 INCREASE THESE LIMITS FROM 16KB TO 10MB
-app.use(express.json({ limit: "10mb" }))
-app.use(express.urlencoded({ extended: true, limit: "10mb" }))
+// ❌ REMOVE THESE GLOBAL LINES - THEY CAUSE THE PROBLEM
+// app.use(express.json({ limit: "10mb" }))
+// app.use(express.urlencoded({ extended: true, limit: "10mb" }))
+
 app.use(express.static("public"))
 app.use(cookieParser())
 
-// Your existing routes...
+// Routes - they will handle their own JSON parsing
 import userRouter from './routes/user.routes.js'
 import videoRouter from './routes/video.routes.js'
 import commentRouter from './routes/comment.routes.js'

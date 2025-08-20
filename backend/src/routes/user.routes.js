@@ -1,5 +1,5 @@
-// src/routes/user.routes.js
 import { Router } from 'express';
+import express from 'express';
 import { 
     registerUser, 
     loginUser, 
@@ -18,43 +18,40 @@ import { VerifyJWT } from "../middlewares/auth.middleware.js"
 
 const router = Router()
 
-// Public routes
+// Create JSON parsers for specific routes
+const jsonParser = express.json({ limit: "10mb" });
+const urlencodedParser = express.urlencoded({ extended: true, limit: "10mb" });
+
+// ✅ MULTIPART ROUTES - NO JSON PARSING (Multer handles these)
 router.route("/register").post(
     upload.fields([
-        {
-            name: "avatar",
-            maxCount: 1
-        }, 
-        {
-            name: "coverImage",
-            maxCount: 1
-        }
+        { name: "avatar", maxCount: 1 }, 
+        { name: "coverImage", maxCount: 1 }
     ]),
     registerUser
 )
-router.route("/login").post(loginUser)
-router.route("/refresh-token").post(refreshAccessToken)
 
-// Protected routes
-router.route("/logout").post(VerifyJWT, logoutuser)
-router.route("/change-password").post(VerifyJWT, changeCurrentPassword)
-router.route("/current-user").get(VerifyJWT, getCurrentUser)
-router.route("/update-account").patch(VerifyJWT, updateAccountDetails)
-
-// Image update routes - THESE ARE THE KEY FIXES
 router.route("/avatar").patch(
     VerifyJWT, 
-    upload.single("avatar"),  // Single file with field name "avatar"
+    upload.single("avatar"),
     updateUserAvatar
 )
 
 router.route("/cover-image").patch(
     VerifyJWT, 
-    upload.single("coverImage"),  // Single file with field name "coverImage"
+    upload.single("coverImage"),
     updateUserCoverImage
 )
 
-// Channel and history routes
+// ✅ JSON ROUTES - ADD JSON PARSING
+router.route("/login").post(jsonParser, urlencodedParser, loginUser)
+router.route("/refresh-token").post(jsonParser, urlencodedParser, refreshAccessToken)
+router.route("/logout").post(jsonParser, urlencodedParser, VerifyJWT, logoutuser)
+router.route("/change-password").post(jsonParser, urlencodedParser, VerifyJWT, changeCurrentPassword)
+router.route("/update-account").patch(jsonParser, urlencodedParser, VerifyJWT, updateAccountDetails)
+
+// ✅ GET ROUTES - NO PARSING NEEDED
+router.route("/current-user").get(VerifyJWT, getCurrentUser)
 router.route("/c/:username").get(VerifyJWT, getUserChannelProfile)
 router.route("/history").get(VerifyJWT, getWatchHistory)
 

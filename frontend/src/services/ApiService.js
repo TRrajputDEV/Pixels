@@ -49,57 +49,64 @@ class ApiService {
     }
 
     async makeRequest(endpoint, options) {
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
-        };
-
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        const config = {
-            ...options,
-            headers,
-            credentials: 'include'
-        };
-
-        try {
-            const response = await fetch(`${this.baseURL}${endpoint}`, config);
-            
-            // Handle specific HTTP errors
-            if (response.status === 401) {
-                this.handleUnauthorized();
-                throw new ApiError('Unauthorized', 401, 'Please sign in again');
-            }
-            
-            if (response.status === 403) {
-                throw new ApiError('Forbidden', 403, 'You don\'t have permission to perform this action');
-            }
-            
-            if (response.status === 404) {
-                throw new ApiError('Not Found', 404, 'The requested resource was not found');
-            }
-            
-            if (response.status >= 500) {
-                throw new ApiError('Server Error', response.status, 'Server is temporarily unavailable');
-            }
-
-            return response;
-            
-        } catch (error) {
-            if (error instanceof ApiError) {
-                throw error;
-            }
-            
-            if (!navigator.onLine) {
-                throw new ApiError('Network Error', 0, 'No internet connection');
-            }
-            
-            throw new ApiError('Network Error', 0, 'Failed to connect to server');
-        }
+    const headers = {};
+    
+    // ✅ ONLY set JSON headers if NOT FormData
+    if (options.body && !(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
     }
+    
+    // Add custom headers
+    if (options.headers) {
+        Object.assign(headers, options.headers);
+    }
+
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const config = {
+        ...options,
+        headers,
+        credentials: 'include'
+    };
+
+    try {
+        const response = await fetch(`${this.baseURL}${endpoint}`, config);
+        
+        if (response.status === 401) {
+            this.handleUnauthorized();
+            throw new ApiError('Unauthorized', 401, 'Please sign in again');
+        }
+        
+        if (response.status === 403) {
+            throw new ApiError('Forbidden', 403, 'You don\'t have permission to perform this action');
+        }
+        
+        if (response.status === 404) {
+            throw new ApiError('Not Found', 404, 'The requested resource was not found');
+        }
+        
+        if (response.status >= 500) {
+            throw new ApiError('Server Error', response.status, 'Server is temporarily unavailable');
+        }
+
+        return response;
+        
+    } catch (error) {
+        if (error instanceof ApiError) {
+            throw error;
+        }
+        
+        if (!navigator.onLine) {
+            throw new ApiError('Network Error', 0, 'No internet connection');
+        }
+        
+        throw new ApiError('Network Error', 0, 'Failed to connect to server');
+    }
+}
+
 
     async request(endpoint, options = {}) {
         try {
