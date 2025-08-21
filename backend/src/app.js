@@ -17,7 +17,7 @@ if (!fs.existsSync(tempDir)) {
 }
 
 const corsOptions = {
-    origin: 'https://watchpixels.onrender.com',
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
