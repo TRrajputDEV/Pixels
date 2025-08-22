@@ -151,16 +151,16 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
         console.log('Cloudinary upload success');
         console.log('Video public_id:', videoFile.public_id);
-        console.log('Video url:', videoFile.url);
-        console.log('Thumbnail url:', thumbnail.url);
+        console.log('Video url:', videoFile.secure_url);
+        console.log('Thumbnail url:', thumbnail.secure_url);
 
         // Create video document in MongoDB with security metadata
         const video = await Video.create({
             title,
             description,
             duration: videoFile.duration || 0,
-            videoFile: videoFile.url,
-            thumbnail: thumbnail.url,
+            videoFile: videoFile.secure_url,
+            thumbnail: thumbnail.secure_url,
             owner: req.user?._id,
             isPublished: true,
             cloudinaryPublicId: videoFile.public_id,
@@ -442,7 +442,7 @@ const updateVideo = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Failed to upload thumbnail")
         }
 
-        updateFields.thumbnail = thumbnail.url
+        updateFields.thumbnail = thumbnail.secure_url
     }
 
     const updatedVideo = await Video.findByIdAndUpdate(

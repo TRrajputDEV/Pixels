@@ -64,7 +64,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Upload avatar to cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    if (!avatar?.url) {
+    if (!avatar?.secure_url) {
         throw new ApiError(400, "Failed to upload avatar to cloudinary.");
     }
 
@@ -72,15 +72,15 @@ const registerUser = asyncHandler(async (req, res) => {
     let coverImageUrl = "";
     if (coverImageLocalPath) {
         const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-        if (coverImage?.url) {
-            coverImageUrl = coverImage.url;
+        if (coverImage?.secure_url) {
+            coverImageUrl = coverImage.secure_url;
         }
     }
 
     // Create user
     const user = await User.create({
         fullname,
-        avatar: avatar.url,
+        avatar: avatar.secure_url,
         coverImage: coverImageUrl,
         email,
         password,
@@ -299,7 +299,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     }
     const avatar = await uploadOnCloudinary(avatarLocalPath)
 
-    if (!avatar.url) {
+    if (!avatar.secure_url) {
         throw new ApiError(400, "Error while uploading on avatar")
     }
 
@@ -307,7 +307,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         req.user?._id,
         {
             $set: {
-                avatar: avatar.url
+                avatar: avatar.secure_url
             }
         },
         { new: true }
@@ -327,7 +327,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     }
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
-    if (!coverImage.url) {
+    if (!coverImage.secure_url) {
         throw new ApiError(400, "Error while uploading on coverImage")
     }
 
@@ -335,7 +335,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         req.user?._id,
         {
             $set: {
-                coverImage: coverImage.url
+                coverImage: coverImage.secure_url
             }
         },
         { new: true }
