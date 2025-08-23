@@ -41,6 +41,7 @@ import {
 // Error handling components
 import ErrorBoundary from "@/common/ErrorBoundary"
 import NetworkStatus from "@/common/NetworkStatus"
+import LikedVideos from "./components/profile/LikedVideos"
 
 function App() {
     return (
@@ -106,12 +107,7 @@ function App() {
                                         } />
                                         <Route path="/liked-videos" element={
                                             <ProtectedRoute>
-                                                <ComingSoon 
-                                                    feature="Liked Videos" 
-                                                    description="Keep track of all the videos you've liked and easily find them again!"
-                                                    icon={ThumbsUp}
-                                                    estimatedDate="Coming in February 2024"
-                                                />
+                                                <LikedVideos/>
                                             </ProtectedRoute>
                                         } />
                                         <Route path="/studio" element={
