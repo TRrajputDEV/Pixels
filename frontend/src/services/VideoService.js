@@ -274,9 +274,6 @@ class VideoService {
         return this.getVideoById(videoId);
     }
 
-    // Add these methods to your existing src/services/VideoService.js
-
-    // Search videos by query
     async searchVideos(query, params = {}) {
         if (!query || !query.trim()) {
             return { error: 'Search query is required', success: false };
@@ -307,9 +304,6 @@ class VideoService {
         return this.searchVideos(query, { limit: 5 });
     }
 
-    // Add these methods to your existing src/services/VideoService.js
-
-    // Update video details
     async updateVideo(videoId, videoData) {
         if (!videoId) {
             return { error: 'Video ID is required', success: false };

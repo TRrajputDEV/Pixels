@@ -8,7 +8,9 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
-    streamVideo
+    streamVideo,
+    getTrendingVideos,
+    getExploreVideos
 } from "../controllers/video.controller.js"
 import {VerifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -21,8 +23,12 @@ const urlencodedParser = express.urlencoded({ extended: true, limit: '10mb' });
 
 // Public routes (no auth required, no JSON parsing needed for GET)
 router.route("/").get(getAllVideos);
-router.route("/:videoId").get(getVideoById);
-router.route("/:videoId/stream").get(streamVideo);
+// ✅ CORRECT ORDER - Static routes first
+router.route("/trending").get(getTrendingVideos);    // Static route
+router.route("/explore").get(getExploreVideos);      // Static route
+router.route("/:videoId").get(getVideoById);         // Param route comes last
+router.route("/:videoId/stream").get(streamVideo);   // Other param routes
+
 
 // Protected routes (auth required)
 router.use(VerifyJWT);
