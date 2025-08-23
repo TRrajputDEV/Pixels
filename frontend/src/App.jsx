@@ -28,7 +28,8 @@ import WatchLaterPage from "@/components/pages/WatchLaterPage"
 import PlaylistsPage from "@/components/pages/PlaylistsPage"
 import HistoryPage from "@/components/pages/HistoryPage"
 import ComingSoon from "@/common/ComingSoon"
-import SettingsPage from '@/components/pages/SettingsPage';
+import AboutPage from '@/components/pages/AboutPage';
+import HelpCenterPage from '@/components/pages/HelpCenterPage';
 
 // Icons for coming soon pages
 import { 
@@ -60,6 +61,8 @@ function App() {
                                 <AppLayout>
                                     <Routes>
                                         {/* Public Routes */}
+                                        
+                                        <Route path="/register" element={<HomePage />} />
                                         <Route path="/" element={<HomePage />} />
                                         <Route path="/watch/:videoId" element={<WatchVideo />} />
                                         <Route path="/search" element={<SearchResults />} />
@@ -122,27 +125,12 @@ function App() {
                                             </ProtectedRoute>
                                         } />
 
-                                        {/* Settings & Info Routes */}
-                                        <Route path="/settings" element={
-                                            <ProtectedRoute>
-                                                <SettingsPage/>
-                                            </ProtectedRoute>
-                                        } />
+                                        
                                         <Route path="/help" element={
-                                            <ComingSoon 
-                                                feature="Help Center" 
-                                                description="Get support, tutorials, and answers to frequently asked questions!"
-                                                icon={HelpCircle}
-                                                estimatedDate="Coming in January 2024"
-                                            />
+                                            <HelpCenterPage/>
                                         } />
                                         <Route path="/about" element={
-                                            <ComingSoon 
-                                                feature="About Page" 
-                                                description="Learn more about Pixels, our mission, and the team behind the platform!"
-                                                icon={Info}
-                                                estimatedDate="Coming Soon"
-                                            />
+                                            <AboutPage/>
                                         } />
 
                                         {/* 404 Route */}
