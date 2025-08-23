@@ -47,7 +47,7 @@ router.route("/cover-image").patch(
 router.route("/login").post(jsonParser, urlencodedParser, loginUser)
 router.route("/refresh-token").post(jsonParser, urlencodedParser, refreshAccessToken)
 router.route("/logout").post(jsonParser, urlencodedParser, VerifyJWT, logoutuser)
-router.route("/change-password").post(jsonParser, urlencodedParser, VerifyJWT, changeCurrentPassword)
+router.route("/change-password").patch(jsonParser, urlencodedParser, VerifyJWT, changeCurrentPassword)
 router.route("/update-account").patch(jsonParser, urlencodedParser, VerifyJWT, updateAccountDetails)
 
 // ✅ GET ROUTES - NO PARSING NEEDED

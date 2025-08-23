@@ -137,12 +137,6 @@ const Sidebar = ({ isOpen, className = "" }) => {
 
     const settingsNavItems = [
         {
-            title: "Settings",
-            icon: Settings,
-            href: "/settings",
-            description: "App preferences"
-        },
-        {
             title: "Help",
             icon: HelpCircle,
             href: "/help",

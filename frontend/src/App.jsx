@@ -28,6 +28,7 @@ import WatchLaterPage from "@/components/pages/WatchLaterPage"
 import PlaylistsPage from "@/components/pages/PlaylistsPage"
 import HistoryPage from "@/components/pages/HistoryPage"
 import ComingSoon from "@/common/ComingSoon"
+import SettingsPage from '@/components/pages/SettingsPage';
 
 // Icons for coming soon pages
 import { 
@@ -123,12 +124,9 @@ function App() {
 
                                         {/* Settings & Info Routes */}
                                         <Route path="/settings" element={
-                                            <ComingSoon 
-                                                feature="Settings" 
-                                                description="Customize your Pixels experience with advanced settings and preferences!"
-                                                icon={Settings}
-                                                estimatedDate="Coming in January 2024"
-                                            />
+                                            <ProtectedRoute>
+                                                <SettingsPage/>
+                                            </ProtectedRoute>
                                         } />
                                         <Route path="/help" element={
                                             <ComingSoon 

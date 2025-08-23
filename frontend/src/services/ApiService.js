@@ -298,7 +298,7 @@ class ApiService {
     // Add this method to your ApiService class
     async changePassword(passwordData) {
         return this.request('/users/change-password', {
-            method: 'POST',
+            method: 'PATCH',
             body: JSON.stringify(passwordData)
         });
     }

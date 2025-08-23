@@ -272,68 +272,83 @@ const UserProfile = () => {
         }
     }
 
+
     const handlePasswordChange = async () => {
-        if (!passwordData.oldPassword || !passwordData.newPassword) {
-            toast({
-                title: "Missing Fields",
-                description: "Please fill in all password fields",
-                variant: "destructive",
-            })
-            return
-        }
-
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            toast({
-                title: "Password Mismatch",
-                description: "New password and confirm password don't match",
-                variant: "destructive",
-            })
-            return
-        }
-
-        if (passwordData.newPassword.length < 6) {
-            toast({
-                title: "Weak Password",
-                description: "Password must be at least 6 characters long",
-                variant: "destructive",
-            })
-            return
-        }
-
         try {
-            setChangingPassword(true)
-            const result = await apiService.changePassword({
+            setChangingPassword(true);
+
+            // Frontend validation
+            if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+                toast({
+                    title: "Error",
+                    description: "All password fields are required",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            if (passwordData.newPassword !== passwordData.confirmPassword) {
+                toast({
+                    title: "Error",
+                    description: "New passwords do not match",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            if (passwordData.newPassword.length < 6) {
+                toast({
+                    title: "Error",
+                    description: "New password must be at least 6 characters long",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Call API
+            const response = await apiService.changePassword({
                 oldPassword: passwordData.oldPassword,
                 newPassword: passwordData.newPassword
-            })
+            });
 
-            if (result.error) {
-                toast({
-                    title: "Password Change Failed",
-                    description: result.error,
-                    variant: "destructive",
-                })
-            } else {
+            console.log("Password change response:", response); // Debug log
+
+            if (response.success) {
+                // Clear form
                 setPasswordData({
                     oldPassword: "",
                     newPassword: "",
                     confirmPassword: ""
-                })
+                });
+
                 toast({
-                    title: "Password Changed",
-                    description: "Your password has been updated successfully",
-                })
+                    title: "Success",
+                    description: "Password changed successfully",
+                });
+            } else {
+                // ✅ Extract the specific error message
+                const errorMessage = response.error || response.message || "Failed to change password";
+
+                toast({
+                    title: "Error",
+                    description: errorMessage,
+                    variant: "destructive",
+                });
             }
-        } catch (err) {
+        } catch (error) {
+            console.error("Password change error:", error);
+
+            // ✅ Handle network/parsing errors
             toast({
                 title: "Error",
-                description: err.message || "Failed to change password",
+                description: "Network error. Please try again.",
                 variant: "destructive",
-            })
+            });
         } finally {
-            setChangingPassword(false)
+            setChangingPassword(false);
         }
-    }
+    };
+
 
     return (
         // Replace your entire content area with this tabbed interface:
