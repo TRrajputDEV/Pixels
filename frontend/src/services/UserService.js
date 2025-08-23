@@ -7,7 +7,7 @@ class UserService {
     async request(endpoint, options = {}) {
         try {
             const headers = {};
-            
+
             const token = localStorage.getItem('accessToken');
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
@@ -44,6 +44,12 @@ class UserService {
             return { error: error.message || 'Network error', success: false };
         }
     }
+
+    // Add to src/services/UserService.js
+    async getCurrentUser() {
+        return this.request('/users/current-user');
+    }
+
 
     // Get user channel profile by username
     async getUserChannelProfile(username) {
@@ -83,6 +89,25 @@ class UserService {
             body: formData
         });
     }
+
+    // Add to UserService.js
+    async updateAccountDetails(userData) {
+        return this.request('/users/update-account', {
+            method: 'PATCH',
+            body: JSON.stringify(userData)
+        });
+    }
+
+    async updateAvatar(avatarFile) {
+        const formData = new FormData();
+        formData.append('avatar', avatarFile);
+
+        return this.request('/users/avatar', {
+            method: 'PATCH',
+            body: formData
+        });
+    }
+
 }
 
 const userService = new UserService();

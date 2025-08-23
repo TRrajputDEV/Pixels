@@ -244,25 +244,40 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
+
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
+
+    // Validation
+    if (!oldPassword || !newPassword) {
+        throw new ApiError(400, "Both old password and new password are required");
+    }
+
+    if (newPassword.length < 6) {
+        throw new ApiError(400, "New password must be at least 6 characters long");
+    }
+
     const user = await User.findById(req.user?._id);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
     if (!isPasswordCorrect) {
-        throw new ApiError(400, "Invalid Old password")
+        // ✅ Make sure this throws ApiError with clear message
+        throw new ApiError(400, "The current password you entered is incorrect");
     }
 
     user.password = newPassword;
-    await user.save({
-        validateBeforeSave: false
-    });
+    await user.save({ validateBeforeSave: false });
 
     return res
         .status(200)
-        .json(new ApiResponse(200, {}, "password changed sucessfully")
-        )
-})
+        .json(new ApiResponse(200, {}, "Password changed successfully"));
+});
+
+
 
 const getCurrentUser = asyncHandler(async (req, res) => {
     return res
