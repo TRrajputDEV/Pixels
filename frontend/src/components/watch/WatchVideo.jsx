@@ -196,15 +196,6 @@ const VideoPlayer = ({ videoUrl, thumbnail, onTimeUpdate, onLoadedMetadata }) =>
                 disablePictureInPicture
                 onContextMenu={(e) => e.preventDefault()} // Disable right-click
                 style={{ pointerEvents: 'none' }} // Prevent direct interaction
-                // onError={(e) => {
-                //     console.error("Video error:", e.target.error);
-                //     console.error("Error code:", e.target.error?.code);
-                //     console.error("Error message:", e.target.error?.message);
-                //     console.error("Video source:", e.target.src);
-                // }}
-                // onLoadStart={() => console.log("Video load started")}
-                // onLoadedData={() => console.log("Video data loaded")}
-                // onCanPlay={() => console.log("Video can play")}
             />
 
             {/* Loading Overlay */}

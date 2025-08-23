@@ -192,13 +192,7 @@ const VideoUpload = () => {
                 thumbnail: thumbnailFile   // File object
             }
 
-            // Debug logs (remove in production)
-            console.log('Uploading with data:', {
-                title: videoData.title,
-                description: videoData.description,
-                videoFile: videoData.videoFile?.name,
-                thumbnail: videoData.thumbnail?.name
-            })
+            
 
             // Simulate upload progress
             const progressInterval = setInterval(() => {
@@ -485,7 +479,7 @@ const VideoUpload = () => {
                         <Alert>
                             <CheckCircle className="h-4 w-4" />
                             <AlertDescription>
-                                🎉 Video uploaded successfully! Redirecting to watch page...
+                                Video uploaded successfully! Redirecting to watch page...
                             </AlertDescription>
                         </Alert>
                     )}

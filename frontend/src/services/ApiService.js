@@ -243,7 +243,6 @@ class ApiService {
         const formData = new FormData();
         formData.append('avatar', avatarFile); // Field name must match multer config
 
-        console.log('Uploading avatar:', avatarFile.name); // Debug log
 
         return this.request('/users/avatar', { // Make sure this matches your route
             method: 'PATCH',
@@ -256,7 +255,7 @@ class ApiService {
         const formData = new FormData();
         formData.append('coverImage', coverImageFile); // Field name must match multer config
 
-        console.log('Uploading cover image:', coverImageFile.name); // Debug log
+
 
         return this.request('/users/cover-image', { // Make sure this matches your route
             method: 'PATCH',

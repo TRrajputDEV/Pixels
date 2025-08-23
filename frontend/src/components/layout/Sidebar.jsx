@@ -71,30 +71,30 @@ const Sidebar = ({ isOpen, className = "" }) => {
             href: "/my-videos",
             description: "Manage uploads"
         },
-        {
-            title: "Watch Later",
-            icon: Clock,
-            href: "/watch-later",
-            description: "Saved for later"
-        },
+        // {
+        //     title: "Watch Later",
+        //     icon: Clock,
+        //     href: "/watch-later",
+        //     description: "Saved for later"
+        // },
         {
             title: "Liked Videos",
             icon: ThumbsUp,
             href: "/liked-videos",
             description: "Videos you liked"
         },
-        {
-            title: "Playlists",
-            icon: PlaySquare,
-            href: "/playlists",
-            description: "Your collections"
-        },
-        {
-            title: "History",
-            icon: History,
-            href: "/history",
-            description: "Watch history"
-        }
+        // {
+        //     title: "Playlists",
+        //     icon: PlaySquare,
+        //     href: "/playlists",
+        //     description: "Your collections"
+        // },
+        // {
+        //     title: "History",
+        //     icon: History,
+        //     href: "/history",
+        //     description: "Watch history"
+        // }
     ] : []
 
     const subscriptionNavItems = isAuthenticated ? [
