@@ -239,14 +239,6 @@ class ApiService {
         });
     }
 
-    // Update User Avatar
-    // src/services/ApiService.js
-    // Update these methods to use the correct field names:
-
-    // Update User Avatar - use 'avatar' field name
-    // src/services/ApiService.js
-    // Update these methods with the EXACT endpoint paths:
-
     async updateAvatar(avatarFile) {
         const formData = new FormData();
         formData.append('avatar', avatarFile); // Field name must match multer config
@@ -272,8 +264,6 @@ class ApiService {
             // Don't set Content-Type header - let browser set it for FormData
         });
     }
-
-
 
     // Get User Channel Profile
     async getUserChannelProfile(username) {

@@ -5,17 +5,17 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
-import { 
-    uploadOnCloudinary, 
-    generateSignedVideoUrl, 
-    generateStreamingUrl 
+import {
+    uploadOnCloudinary,
+    generateSignedVideoUrl,
+    generateStreamingUrl
 } from "../utils/cloudinary.js"
 import fs from 'fs'
 
 // NEW: Secure video streaming endpoint
 const streamVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
-    
+
     if (!isValidObjectId(videoId)) {
         throw new ApiError(400, "Invalid video ID");
     }
@@ -73,7 +73,7 @@ const streamVideo = asyncHandler(async (req, res) => {
         }
 
         return res.status(200).json(
-            new ApiResponse(200, { 
+            new ApiResponse(200, {
                 streamingUrl,
                 expiresAt: new Date(Date.now() + 3600 * 1000).toISOString()
             }, "Streaming URL generated successfully")
@@ -508,6 +508,57 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, video, "Video publish status updated successfully"))
 })
 
+
+// Add to video.controller.js
+const getTrendingVideos = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 20 } = req.query;
+
+    const trendingVideos = await Video.aggregate([
+        {
+            $match: {
+                isPublished: true  // Only published videos
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullname: 1,
+                            avatar: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $unwind: "$owner"
+        },
+        {
+            $sort: { 
+                views: -1,      // Primary sort: most views
+                createdAt: -1   // Secondary sort: newest first for ties
+            }
+        },
+        {
+            $limit: parseInt(limit)
+        }
+    ]);
+
+    // Apply HTTPS fixes to all video URLs
+    const secureVideos = trendingVideos.map(video => secureVideoUrls(video));
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, secureVideos, "Trending videos fetched successfully"));
+});
+
+
 export {
     getAllVideos,
     publishAVideo,
@@ -516,5 +567,6 @@ export {
     deleteVideo,
     togglePublishStatus,
     streamVideo,
-    streamVideoWithRange
+    streamVideoWithRange,
+    getTrendingVideos
 }

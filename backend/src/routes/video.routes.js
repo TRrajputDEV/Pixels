@@ -8,7 +8,8 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
-    streamVideo
+    streamVideo,
+    getTrendingVideos
 } from "../controllers/video.controller.js"
 import {VerifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -23,6 +24,8 @@ const urlencodedParser = express.urlencoded({ extended: true, limit: '10mb' });
 router.route("/").get(getAllVideos);
 router.route("/:videoId").get(getVideoById);
 router.route("/:videoId/stream").get(streamVideo);
+router.route("/trending").get(getTrendingVideos);
+
 
 // Protected routes (auth required)
 router.use(VerifyJWT);
