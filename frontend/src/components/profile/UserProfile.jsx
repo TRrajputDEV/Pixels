@@ -311,7 +311,6 @@ const UserProfile = () => {
                 newPassword: passwordData.newPassword
             });
 
-            console.log("Password change response:", response); // Debug log
 
             if (response.success) {
                 // Clear form

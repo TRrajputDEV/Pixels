@@ -232,19 +232,7 @@ const TrendingPage = () => {
                     ))}
                 </div>
 
-                {/* Load More Button (Optional) */}
-                <div className="text-center mt-12">
-                    <Button 
-                        variant="outline" 
-                        size="lg"
-                        onClick={() => {
-                            // Implement pagination if needed
-                            console.log('Load more videos');
-                        }}
-                    >
-                        Load More Trending Videos
-                    </Button>
-                </div>
+                
             </div>
         </div>
     );

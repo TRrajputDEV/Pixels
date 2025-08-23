@@ -87,23 +87,13 @@ class VideoService {
             const result = await this.request(`/videos/${videoId}${queryParams}`);
 
             if (result.success && result.data) {
-                console.log("=== VIDEO SERVICE DEBUG ===");
-                console.log("Video data received:", result.data.title);
-                console.log("Secure stream:", result.data.secureStream);
-
                 // If backend indicates secure streaming, get the actual signed URL
                 if (result.data.secureStream && result.data.videoFile.startsWith('/api')) {
-                    console.log("Fetching secure streaming URL...");
-
                     const streamResult = await this.getStreamingUrl(videoId);
-                    console.log("Stream result success:", streamResult.success);
-
                     if (streamResult.success && streamResult.data?.streamingUrl) {
                         result.data.videoFile = streamResult.data.streamingUrl;
                         result.data.streamingExpiresAt = streamResult.data.expiresAt;
-                        console.log("Secure URL obtained successfully");
                     } else {
-                        console.error("Failed to get streaming URL:", streamResult.error);
                         // Fallback - could revert to direct URL or show error
                         return { error: "Unable to load video securely", success: false };
                     }
@@ -112,7 +102,6 @@ class VideoService {
 
             return result;
         } catch (error) {
-            console.error("VideoService getVideoById error:", error);
             return { error: error.message, success: false };
         }
     }
@@ -134,13 +123,6 @@ class VideoService {
         if (videoData.thumbnail) {
             formData.append('thumbnail', videoData.thumbnail);
         }
-
-        // Debug: Log FormData (remove in production)
-        console.log('Sending FormData with fields:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}:`, value instanceof File ? `File(${value.name})` : value);
-        }
-
         return this.request('/videos', {
             method: 'POST',
             body: formData

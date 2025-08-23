@@ -46,8 +46,6 @@ const AppLayout = ({ children }) => {
     const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
 
-    console.log("Auth Debug:", { user, isAuthenticated, isLoading }) // Debug log
-
     // Handle responsive behavior
     useEffect(() => {
         const handleResize = () => {
