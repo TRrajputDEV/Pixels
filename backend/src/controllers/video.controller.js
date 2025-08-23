@@ -12,6 +12,35 @@ import {
 } from "../utils/cloudinary.js"
 import fs from 'fs'
 
+// HTTPS Helper Function - add this after imports
+const secureVideoUrls = (video) => {
+    if (!video) return video;
+    
+    const ensureHttps = (url) => {
+        if (!url || typeof url !== 'string') return url;
+        return url.replace(/^http:\/\//, 'https://');
+    };
+    
+    const secureVideo = { ...video };
+    
+    if (secureVideo.videoFile) {
+        secureVideo.videoFile = ensureHttps(secureVideo.videoFile);
+    }
+    if (secureVideo.thumbnail) {
+        secureVideo.thumbnail = ensureHttps(secureVideo.thumbnail);
+    }
+    if (secureVideo.owner) {
+        secureVideo.owner = {
+            ...secureVideo.owner,
+            avatar: ensureHttps(secureVideo.owner.avatar),
+            coverImage: ensureHttps(secureVideo.owner.coverImage)
+        };
+    }
+    
+    return secureVideo;
+};
+
+
 // NEW: Secure video streaming endpoint
 const streamVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
@@ -540,7 +569,7 @@ const getTrendingVideos = asyncHandler(async (req, res) => {
             $unwind: "$owner"
         },
         {
-            $sort: { 
+            $sort: {
                 views: -1,      // Primary sort: most views
                 createdAt: -1   // Secondary sort: newest first for ties
             }
@@ -558,6 +587,91 @@ const getTrendingVideos = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, secureVideos, "Trending videos fetched successfully"));
 });
 
+// Add to video.controller.js
+const getExploreVideos = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 20, category, query, sortBy = 'createdAt', sortType = 'desc' } = req.query;
+
+    const pipeline = [];
+
+    // Match published videos
+    pipeline.push({
+        $match: {
+            isPublished: true
+        }
+    });
+
+    // Add search functionality
+    if (query) {
+        pipeline.push({
+            $match: {
+                $or: [
+                    { title: { $regex: query, $options: "i" } },
+                    { description: { $regex: query, $options: "i" } }
+                ]
+            }
+        });
+    }
+
+    // Add category filter if you have categories in future
+    if (category && category !== 'all') {
+        pipeline.push({
+            $match: {
+                category: category
+            }
+        });
+    }
+
+    // Lookup owner info
+    pipeline.push({
+        $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner",
+            pipeline: [
+                {
+                    $project: {
+                        username: 1,
+                        fullname: 1,
+                        avatar: 1
+                    }
+                }
+            ]
+        }
+    });
+
+    pipeline.push({
+        $unwind: "$owner"
+    });
+
+    // Sort videos
+    const sortStage = {};
+    if (sortBy && sortType) {
+        sortStage[sortBy] = sortType === "desc" ? -1 : 1;
+    } else {
+        sortStage.createdAt = -1;
+    }
+    pipeline.push({ $sort: sortStage });
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: parseInt(limit) });
+
+    const exploreVideos = await Video.aggregate(pipeline);
+
+    // Apply HTTPS fixes
+    const secureVideos = exploreVideos.map(video => secureVideoUrls(video));
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {
+            videos: secureVideos,
+            page: parseInt(page),
+            hasMore: secureVideos.length === parseInt(limit)
+        }, "Explore videos fetched successfully"));
+});
+
 
 export {
     getAllVideos,
@@ -568,5 +682,6 @@ export {
     togglePublishStatus,
     streamVideo,
     streamVideoWithRange,
-    getTrendingVideos
+    getTrendingVideos,
+    getExploreVideos
 }
