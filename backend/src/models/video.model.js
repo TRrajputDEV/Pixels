@@ -52,12 +52,60 @@ const VideoSchema = new mongoose.Schema(
         videoFormat: {
             type: String, // mp4, webm, etc.
             default: "mp4"
+        },
+        tags: {
+            type: [String],
+            default: [],
+            index: true  // For efficient searching
+        },
+        mood: {
+            type: String,
+            enum: ['funny', 'educational', 'chill', 'exciting', 'inspiring', 'random', null],
+            default: null,
+            index: true
+        },
+        category: {
+            type: String,
+            enum: ['tech', 'comedy', 'music', 'gaming', 'lifestyle', 'education', 'sports', 'cooking', 'fitness', 'other'],
+            default: 'other',
+            index: true
+        },
+        duration_category: {
+            type: String,
+            enum: ['short', 'medium', 'long'],  // <5min, 5-20min, >20min
+            index: true
+        },
+        intent_keywords: {
+            type: [String],
+            default: []  // Auto-generated from title/description
         }
     },
     {
         timestamps: true
     }
 )
+
+VideoSchema.index({ 
+    title: 'text', 
+    description: 'text', 
+    tags: 'text',
+    intent_keywords: 'text'
+});
+
+
+// Pre-save middleware to auto-categorize duration
+VideoSchema.pre('save', function(next) {
+    if (this.duration) {
+        if (this.duration < 300) { // < 5 minutes
+            this.duration_category = 'short';
+        } else if (this.duration < 1200) { // < 20 minutes
+            this.duration_category = 'medium';
+        } else {
+            this.duration_category = 'long';
+        }
+    }
+    next();
+});
 
 VideoSchema.plugin(mongooseAggregatePaginate)
 
