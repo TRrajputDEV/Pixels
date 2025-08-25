@@ -12,17 +12,158 @@ import {
 } from "../utils/cloudinary.js"
 import fs from 'fs'
 
-// HTTPS Helper Function - add this after imports
+
+import { IntentMapper } from '../utils/intentMapping.js';
+import { AutoTagger } from '../utils/autoTagging.js';
+// Update your smartSearch controller in video.controller.js
+// Update your smartSearch controller with this simplified version
+const smartSearch = asyncHandler(async (req, res) => {
+    const { 
+        query, 
+        exploreMode = 'false',
+        page = 1, 
+        limit = 20 
+    } = req.query;
+
+    const userId = req.user?._id;
+    const isExploreMode = exploreMode === 'true';
+
+    try {
+        console.log('Smart search request:', { query, exploreMode: isExploreMode, userId });
+
+        const intents = IntentMapper.extractIntents(query);
+        console.log('Extracted intents:', intents);
+
+        // 🔧 SIMPLIFIED APPROACH - Avoid complex $text queries for now
+        const pipeline = [];
+
+        const matchStage = { isPublished: true };
+
+        if (query) {
+            // Use simple regex search instead of complex $text + $or
+            const searchRegex = new RegExp(query, 'i');
+            matchStage.$or = [
+                { title: searchRegex },
+                { description: searchRegex }
+            ];
+
+            // Add tag matching if we have intent tags
+            if (intents?.tags && intents.tags.length > 0) {
+                matchStage.$or.push({ tags: { $in: intents.tags } });
+            }
+        }
+
+        // Exploration mode: add some randomization
+        if (isExploreMode) {
+            pipeline.push({ $match: matchStage });
+            pipeline.push({ $sample: { size: parseInt(limit) * 2 } });
+        } else {
+            pipeline.push({ $match: matchStage });
+        }
+
+        // Lookup owner
+        pipeline.push({
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    { $project: { username: 1, fullname: 1, avatar: 1 } }
+                ]
+            }
+        });
+
+        pipeline.push({ $unwind: "$owner" });
+
+        // Sort and paginate
+        if (!isExploreMode) {
+            pipeline.push({ $sort: { view: -1, createdAt: -1 } });
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        pipeline.push({ $skip: skip });
+        pipeline.push({ $limit: parseInt(limit) });
+
+        const videos = await Video.aggregate(pipeline);
+        const secureVideos = videos.map(video => secureVideoUrls(video));
+
+        return res.status(200).json(new ApiResponse(200, {
+            videos: secureVideos,
+            searchQuery: query,
+            extractedIntents: intents,
+            exploreMode: isExploreMode,
+            resultsCount: secureVideos.length,
+            page: parseInt(page),
+            hasMore: secureVideos.length === parseInt(limit),
+            suggestions: IntentMapper.getSuggestions()
+        }, "Smart search completed successfully"));
+
+    } catch (error) {
+        console.error('Smart search error:', error);
+        throw new ApiError(500, "Smart search failed");
+    }
+});
+
+
+
+// Helper function to analyze user's frequent content (Phase 3 - for now return empty)
+const getUserFrequentContent = async (userId) => {
+    try {
+        // Get user's watch history and analyze frequent tags/categories
+        const user = await User.findById(userId).populate({
+            path: 'watchHistory',
+            select: 'tags category',
+            options: { limit: 50 } // Last 50 watched videos
+        });
+
+        if (!user || !user.watchHistory.length) {
+            return { frequentTags: [], frequentCategories: [] };
+        }
+
+        // Count frequency of tags and categories
+        const tagFrequency = {};
+        const categoryFrequency = {};
+
+        user.watchHistory.forEach(video => {
+            if (video.tags) {
+                video.tags.forEach(tag => {
+                    tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
+                });
+            }
+            if (video.category) {
+                categoryFrequency[video.category] = (categoryFrequency[video.category] || 0) + 1;
+            }
+        });
+
+        // Get top frequent items (threshold: appeared in >20% of watched videos)
+        const threshold = Math.ceil(user.watchHistory.length * 0.2);
+
+        const frequentTags = Object.entries(tagFrequency)
+            .filter(([tag, count]) => count >= threshold)
+            .map(([tag]) => tag);
+
+        const frequentCategories = Object.entries(categoryFrequency)
+            .filter(([category, count]) => count >= threshold)
+            .map(([category]) => category);
+
+        return { frequentTags, frequentCategories };
+    } catch (error) {
+        console.error('Error analyzing user content:', error);
+        return { frequentTags: [], frequentCategories: [] };
+    }
+};
+
 const secureVideoUrls = (video) => {
     if (!video) return video;
-    
+
     const ensureHttps = (url) => {
         if (!url || typeof url !== 'string') return url;
         return url.replace(/^http:\/\//, 'https://');
     };
-    
+
     const secureVideo = { ...video };
-    
+
     if (secureVideo.videoFile) {
         secureVideo.videoFile = ensureHttps(secureVideo.videoFile);
     }
@@ -36,7 +177,7 @@ const secureVideoUrls = (video) => {
             coverImage: ensureHttps(secureVideo.owner.coverImage)
         };
     }
-    
+
     return secureVideo;
 };
 
@@ -121,6 +262,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
     console.log('Files:', req.files);
 
     const { title, description } = req.body;
+    const autoTags = AutoTagger.generateTags(title, description);
+    const autoMood = AutoTagger.detectMood(title, description);
+    const autoCategory = AutoTagger.detectCategory(title, description);
 
     // Validate required fields
     if (!title || !description) {
@@ -195,6 +339,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
             cloudinaryPublicId: videoFile.public_id,
             videoSize: videoFile.bytes || 0,
             videoFormat: videoFile.format || "mp4",
+            tags: autoTags,
+            mood: autoMood,
+            category: autoCategory,
+            intent_keywords: autoTags
         });
 
         const createdVideo = await Video.findById(video._id).populate(
@@ -683,5 +831,6 @@ export {
     streamVideo,
     streamVideoWithRange,
     getTrendingVideos,
-    getExploreVideos
+    getExploreVideos,
+    smartSearch
 }

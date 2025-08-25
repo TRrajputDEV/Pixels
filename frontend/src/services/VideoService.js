@@ -323,6 +323,21 @@ class VideoService {
         });
     }
 
+    // Add this method to your VideoService class
+    async smartSearch(query, options = {}) {
+        const queryString = new URLSearchParams();
+
+        if (query) queryString.append('query', query);
+        if (options.exploreMode) queryString.append('exploreMode', options.exploreMode);
+        if (options.page) queryString.append('page', options.page);
+        if (options.limit) queryString.append('limit', options.limit);
+
+        const endpoint = queryString.toString()
+            ? `/videos/smart-search?${queryString}`
+            : `/videos/smart-search`;
+
+        return this.request(endpoint);
+    }
 
 
 }

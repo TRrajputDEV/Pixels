@@ -10,7 +10,8 @@ import {
     updateVideo,
     streamVideo,
     getTrendingVideos,
-    getExploreVideos
+    getExploreVideos,
+    smartSearch
 } from "../controllers/video.controller.js"
 import {VerifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -26,6 +27,7 @@ router.route("/").get(getAllVideos);
 // ✅ CORRECT ORDER - Static routes first
 router.route("/trending").get(getTrendingVideos);    // Static route
 router.route("/explore").get(getExploreVideos);      // Static route
+router.route("/smart-search").get(smartSearch);
 router.route("/:videoId").get(getVideoById);         // Param route comes last
 router.route("/:videoId/stream").get(streamVideo);   // Other param routes
 

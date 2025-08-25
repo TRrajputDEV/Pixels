@@ -1,4 +1,4 @@
-// src/components/search/SearchResults.jsx
+// src/components/search/SearchResults.jsx - Enhanced with Smart Search
 import { useState, useEffect } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import {
     Select,
     SelectContent,
@@ -22,7 +23,9 @@ import {
     Clock,
     AlertCircle,
     Loader2,
-    Play
+    Play,
+    Sparkles,
+    Lightbulb
 } from "lucide-react"
 import VideoGrid from "@/components/home/VideoGrid"
 import videoService from "@/services/VideoService"
@@ -41,12 +44,30 @@ const SearchResults = () => {
     const [error, setError] = useState(null)
     const [totalResults, setTotalResults] = useState(0)
     
+    // 🌟 NEW: Smart Search Features
+    const [exploreMode, setExploreMode] = useState(false)
+    const [extractedIntents, setExtractedIntents] = useState(null)
+    const [suggestions, setSuggestions] = useState([])
+    
     // Filters
     const [sortBy, setSortBy] = useState('createdAt')
     const [sortType, setSortType] = useState('desc')
     const [showFilters, setShowFilters] = useState(false)
 
-    // Search function
+    // Intent Suggestions
+    const intentSuggestions = [
+        "🎭 Make me laugh",
+        "🧠 Teach me something new", 
+        "🎲 Surprise me completely",
+        "😌 Help me relax",
+        "⚡ Something quick (under 5 min)",
+        "🏋️ Workout motivation",
+        "🍳 Cooking inspiration",
+        "💻 Learn coding",
+        "🎵 Music to vibe to"
+    ];
+
+    // 🚀 Enhanced search function using smart search
     const performSearch = async (query = searchQuery, filters = {}) => {
         if (!query.trim()) {
             setError("Please enter a search term")
@@ -57,7 +78,9 @@ const SearchResults = () => {
             setLoading(true)
             setError(null)
             
-            const result = await videoService.searchVideos(query, {
+            // Use smart search API
+            const result = await videoService.smartSearch(query, {
+                exploreMode: exploreMode.toString(),
                 page: 1,
                 limit: 20,
                 sortBy: filters.sortBy || sortBy,
@@ -65,12 +88,17 @@ const SearchResults = () => {
             })
             
             if (result.success) {
-                const videosData = result.data.docs || result.data || []
+                const videosData = result.data.videos || []
                 setVideos(videosData)
-                setTotalResults(result.data.totalDocs || videosData.length)
+                setTotalResults(videosData.length)
+                setExtractedIntents(result.data.extractedIntents)
+                setSuggestions(result.data.suggestions || [])
                 
                 // Update URL with search query
-                setSearchParams({ q: query })
+                setSearchParams({ 
+                    q: query,
+                    ...(exploreMode && { explore: 'true' })
+                })
             } else {
                 setError(result.error || "Failed to search videos")
                 setVideos([])
@@ -88,6 +116,7 @@ const SearchResults = () => {
     useEffect(() => {
         if (initialQuery) {
             setSearchQuery(initialQuery)
+            setExploreMode(searchParams.get('explore') === 'true')
             performSearch(initialQuery)
         }
     }, [initialQuery])
@@ -96,6 +125,21 @@ const SearchResults = () => {
     const handleSearch = (e) => {
         e.preventDefault()
         performSearch()
+    }
+
+    // Handle suggestion clicks
+    const handleSuggestionClick = (suggestion) => {
+        const cleanSuggestion = suggestion.replace(/^[🎭🧠🎲😌⚡🏋️🍳💻🎵]\s/, '')
+        setSearchQuery(cleanSuggestion)
+        performSearch(cleanSuggestion)
+    }
+
+    // Handle explore mode toggle
+    const handleExploreModeChange = (checked) => {
+        setExploreMode(checked)
+        if (searchQuery.trim()) {
+            performSearch(searchQuery)
+        }
     }
 
     // Handle filter changes
@@ -110,11 +154,8 @@ const SearchResults = () => {
     }
 
     const formatNumber = (num) => {
-        if (num >= 1000000) {
-            return `${(num / 1000000).toFixed(1)}M`
-        } else if (num >= 1000) {
-            return `${(num / 1000).toFixed(1)}K`
-        }
+        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+        if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
         return num.toString()
     }
 
@@ -122,20 +163,22 @@ const SearchResults = () => {
         <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-6 max-w-7xl">
                 
-                {/* Search Header */}
+                {/* Enhanced Search Header */}
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-4">
                         <Search className="h-6 w-6 text-primary" />
-                        <h1 className="text-3xl font-bold doto-font-heading">Search Results</h1>
+                        <h1 className="text-3xl font-bold">
+                            {exploreMode ? ' Smart Explore' : 'Search Results'}
+                        </h1>
                     </div>
                     
-                    {/* Search Form */}
+                    {/* Enhanced Search Form */}
                     <form onSubmit={handleSearch} className="max-w-2xl">
                         <div className="relative">
                             <Input
                                 type="search"
-                                placeholder="Search for videos..."
-                                className="pl-10 pr-4 py-6 text-lg"
+                                placeholder="Try natural language: 'something funny', 'teach me coding', 'surprise me'..."
+                                className="pl-10 pr-32 py-6 text-lg"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -152,8 +195,78 @@ const SearchResults = () => {
                                 )}
                             </Button>
                         </div>
+
+                        {/* 🌟 Exploration Mode Toggle */}
+                        <div className="mt-4 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <Switch
+                                        checked={exploreMode}
+                                        onCheckedChange={handleExploreModeChange}
+                                    />
+                                    <div className="flex items-center space-x-1">
+                                        <Sparkles className="h-4 w-4 text-primary" />
+                                        <span className="font-medium">Explore Something New</span>
+                                    </div>
+                                </label>
+                                {exploreMode && (
+                                    <Badge variant="secondary" className="bg-primary/10">
+                                        Discovery Mode
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Intent Suggestions */}
+                        {!searchQuery && (
+                            <div className="mt-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm text-muted-foreground">Try these:</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {intentSuggestions.slice(0, 6).map((suggestion, index) => (
+                                        <Button
+                                            key={index}
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-xs h-8"
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                        >
+                                            {suggestion}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </form>
                 </div>
+
+                {/* 🎯 Intent Detection Results */}
+                {extractedIntents && (extractedIntents.tags.length > 0 || extractedIntents.mood) && (
+                    <div className="mb-6">
+                        <Card className="bg-primary/5 border-primary/20">
+                            <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Sparkles className="h-4 w-4 text-primary" />
+                                    <span className="font-medium text-sm">I understood you're looking for:</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {extractedIntents.tags.map((tag, index) => (
+                                        <Badge key={index} variant="secondary" className="bg-primary/10">
+                                            {tag}
+                                        </Badge>
+                                    ))}
+                                    {extractedIntents.mood && (
+                                        <Badge className="bg-primary text-primary-foreground">
+                                            {extractedIntents.mood} mood
+                                        </Badge>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
 
                 {/* Results Info & Filters */}
                 {searchQuery && (
@@ -168,6 +281,9 @@ const SearchResults = () => {
                                             <span className="font-semibold">{formatNumber(totalResults)}</span>
                                             <span className="text-muted-foreground"> results for </span>
                                             <span className="font-semibold">"{searchQuery}"</span>
+                                            {exploreMode && (
+                                                <span className="text-primary"> (exploring new content)</span>
+                                            )}
                                         </>
                                     )}
                                 </p>
@@ -192,6 +308,7 @@ const SearchResults = () => {
                                             <SelectItem value="createdAt">Upload Date</SelectItem>
                                             <SelectItem value="view">View Count</SelectItem>
                                             <SelectItem value="title">Title</SelectItem>
+                                            <SelectItem value="relevanceScore">Relevance</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     
@@ -200,15 +317,15 @@ const SearchResults = () => {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="desc">Newest</SelectItem>
-                                            <SelectItem value="asc">Oldest</SelectItem>
+                                            <SelectItem value="desc">High to Low</SelectItem>
+                                            <SelectItem value="asc">Low to High</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             )}
                         </div>
 
-                        {/* Advanced Filters (Collapsible) */}
+                        {/* Advanced Filters (same as before) */}
                         {showFilters && (
                             <Card className="mt-4">
                                 <CardContent className="pt-6">
@@ -220,39 +337,41 @@ const SearchResults = () => {
                                                     <SelectValue placeholder="Any duration" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="short">Under 4 minutes</SelectItem>
-                                                    <SelectItem value="medium">4-20 minutes</SelectItem>
+                                                    <SelectItem value="short">Under 5 minutes</SelectItem>
+                                                    <SelectItem value="medium">5-20 minutes</SelectItem>
                                                     <SelectItem value="long">Over 20 minutes</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                         
                                         <div>
-                                            <label className="text-sm font-medium mb-2 block">Upload Date</label>
+                                            <label className="text-sm font-medium mb-2 block">Mood</label>
                                             <Select>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Any time" />
+                                                    <SelectValue placeholder="Any mood" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="hour">Last hour</SelectItem>
-                                                    <SelectItem value="day">Today</SelectItem>
-                                                    <SelectItem value="week">This week</SelectItem>
-                                                    <SelectItem value="month">This month</SelectItem>
-                                                    <SelectItem value="year">This year</SelectItem>
+                                                    <SelectItem value="funny">Funny</SelectItem>
+                                                    <SelectItem value="educational">Educational</SelectItem>
+                                                    <SelectItem value="chill">Chill</SelectItem>
+                                                    <SelectItem value="exciting">Exciting</SelectItem>
+                                                    <SelectItem value="inspiring">Inspiring</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                         
                                         <div>
-                                            <label className="text-sm font-medium mb-2 block">Type</label>
+                                            <label className="text-sm font-medium mb-2 block">Category</label>
                                             <Select>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="All videos" />
+                                                    <SelectValue placeholder="All categories" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="video">Video</SelectItem>
-                                                    <SelectItem value="playlist">Playlist</SelectItem>
-                                                    <SelectItem value="channel">Channel</SelectItem>
+                                                    <SelectItem value="tech">Tech</SelectItem>
+                                                    <SelectItem value="comedy">Comedy</SelectItem>
+                                                    <SelectItem value="education">Education</SelectItem>
+                                                    <SelectItem value="cooking">Cooking</SelectItem>
+                                                    <SelectItem value="fitness">Fitness</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -273,36 +392,77 @@ const SearchResults = () => {
                     </Alert>
                 )}
 
-                {/* Search Results */}
+                {/* Search Results with Exploration Indicators */}
                 {loading ? (
                     <VideoGrid videos={[]} loading={true} />
                 ) : videos.length > 0 ? (
-                    <VideoGrid videos={videos} loading={false} />
+                    <div>
+                        {exploreMode && (
+                            <div className="mb-4 p-4 bg-gradient-to-r from-primary/5 to-purple/5 rounded-lg border border-primary/20">
+                                <div className="flex items-center gap-2 text-primary">
+                                    <Sparkles className="h-5 w-5" />
+                                    <span className="font-medium">
+                                        🌟 Showing you content outside your usual interests!
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                        <VideoGrid videos={videos} loading={false} />
+                    </div>
                 ) : searchQuery && !loading ? (
                     <div className="text-center py-12">
                         <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
                         <h3 className="text-xl font-semibold mb-2">No results found</h3>
-                        <p className="text-muted-foreground mb-4">
-                            Try different keywords or remove search filters
+                        <p className="text-muted-foreground mb-6">
+                            {exploreMode 
+                                ? "Try turning off exploration mode or different keywords"
+                                : "Try different keywords or enable exploration mode for broader results"
+                            }
                         </p>
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setSearchQuery("")
-                                setSearchParams({})
-                                navigate("/")
-                            }}
-                        >
-                            Browse All Videos
-                        </Button>
+                        <div className="space-x-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setExploreMode(!exploreMode)
+                                    if (searchQuery.trim()) performSearch(searchQuery)
+                                }}
+                            >
+                                {exploreMode ? 'Try Normal Search' : 'Try Exploration Mode'}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setSearchQuery("")
+                                    setSearchParams({})
+                                    navigate("/")
+                                }}
+                            >
+                                Browse All Videos
+                            </Button>
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center py-12">
                         <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="text-xl font-semibold mb-2">Start Your Search</h3>
-                        <p className="text-muted-foreground">
-                            Enter keywords to find videos on Pixels
+                        <h3 className="text-xl font-semibold mb-2">Smart Search is Ready!</h3>
+                        <p className="text-muted-foreground mb-4">
+                            Use natural language to find exactly what you're looking for
                         </p>
+                        <div className="max-w-md mx-auto">
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                {intentSuggestions.slice(6).map((suggestion, index) => (
+                                    <Button
+                                        key={index}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-left justify-start h-auto py-2 px-3"
+                                        onClick={() => handleSuggestionClick(suggestion)}
+                                    >
+                                        {suggestion}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
