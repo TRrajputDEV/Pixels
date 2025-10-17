@@ -117,19 +117,3 @@ Pixels is a one-man mission to deeply understand **full-stack architecture**, im
 
 ---
 
-## 📦 Installation (Coming Soon)
-
-```bash
-# Clone the repo
-
-git clone https://github.com/yourusername/pixels-video-platform.git
-cd pixels-video-platform
-
-# Install dependencies for frontend and backend
-cd client && npm install
-cd ../server && npm install
-
-# Setup environment variables (.env files)
-
-# Start both servers
-npm run dev
