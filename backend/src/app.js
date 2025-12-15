@@ -17,11 +17,8 @@ if (!fs.existsSync(tempDir)) {
 }
 
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    optionsSuccessStatus: 200
+  origin: process.env.CORS_ORIGIN || true,
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -31,6 +28,11 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }))
 
 app.use(express.static("public"))
 app.use(cookieParser())
+console.log("CORS_ORIGIN =", process.env.CORS_ORIGIN);
+app.get("/health", (req, res) => {
+  res.json({ ok: true });
+});
+
 
 // Routes - they will handle their own JSON parsing
 import userRouter from './routes/user.routes.js'

@@ -12,7 +12,7 @@
   "type": "module",
   "main": "backend/src/index.js",
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules backend/src/index.js",
+    "dev": "nodemon -r dotenv/config src/index.js",
     "start": "node -r dotenv/config --experimental-json-modules backend/src/index.js"
   },
   "devDependencies": {
