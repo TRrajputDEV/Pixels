@@ -1,0 +1,17 @@
+
+services:
+  backend:
+    image: pixels-backend
+    container_name: pixels-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build: ./frontend
+    container_name: pixels-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
